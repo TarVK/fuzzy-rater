@@ -10,6 +10,7 @@
     "scripts": {
         "dev": "tsc -w",
         "build": "tsc",
+        "start": "node build/index.js",
         "test": "jest -i",
         "test-watch": "jest --watch -i",
         "test-watch-debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --watch --config=\"jest.config.js\""

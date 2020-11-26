@@ -167,7 +167,7 @@ export function getAvailableTransitionCharacter<N, T>(
 /**
  * Checks what nodes are reachable with the given set, by using empty transitions
  * @param template All the nfa input nodes
- * @param nodes The nodes to get the closure of
+ * @param nodes The nodes to get the closure of, (may include duplicates, which will be removed)
  * @returns The reach of these nodes
  */
 export function getReachableNodes<N, T>(
