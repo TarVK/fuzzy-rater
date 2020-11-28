@@ -1,17 +1,15 @@
-import {DFA} from "../DFA/DFA";
-import {IDFANFANodeData} from "../DFA/_types/NFAconversion/IDFANFANodeData";
-import {IDFANFATransitionData} from "../DFA/_types/NFAconversion/IDFANFATransitionData";
-import {INormalizedNFANode} from "../NFA/_types/INormalizedNFANode";
 import {createFuzzyNFATemplate} from "./createFuzzyNFATemplate";
 import {IFuzzyNodeData} from "./_types/IFuzzyNodeData";
 import {IFuzzyTransitionData} from "./_types/IFuzzyTransitionData";
 import {IFuzzyWordMatch} from "./_types/IFuzzyWordMatch";
+import {NFADFA} from "../DFA/NFADFA/NFADFA";
 
+/**
+ * A fuzzy word matcher that can be used to find a word in a number of items.
+ * Initial setup time is relatively long, but matching per string happens in linear time.
+ */
 export class FuzzyWordMatcher {
-    protected DFA: DFA<
-        IDFANFANodeData<IFuzzyNodeData, IFuzzyTransitionData>,
-        IDFANFATransitionData<IFuzzyTransitionData>
-    >;
+    protected NFA: NFADFA<IFuzzyNodeData, IFuzzyTransitionData>;
 
     /**
      * Constructs a new fuzzy word rater
@@ -29,26 +27,26 @@ export class FuzzyWordMatcher {
      */
     protected initialize(word: string, maxDistance: number): void {
         const nfaTemplate = createFuzzyNFATemplate(word, maxDistance);
-        this.DFA = DFA.fromNFATemplate(nfaTemplate);
+        this.NFA = new NFADFA(nfaTemplate);
     }
 
     /**
      * Finds the best match in a set of NFA nodes
-     * @param nodes The nodes to find the best match in
+     * @param matches The nodes to find the best match in
+     * @param getNode Retrieves the node data
      * @returns The best match
      */
-    protected getBestMatch(
-        nodes: INormalizedNFANode<IFuzzyNodeData, IFuzzyTransitionData>[]
-    ): INormalizedNFANode<IFuzzyNodeData, IFuzzyTransitionData> | undefined {
-        return nodes.reduce(
-            (best, item) => {
-                const md = item.metadata;
-                return md.distance < best.distance && md.matched
-                    ? {item, distance: md.distance}
-                    : best;
-            },
-            {item: undefined, distance: Infinity}
-        ).item;
+    protected getBestMatch<M>(
+        matches: M[],
+        getNode: (data: M) => IFuzzyNodeData
+    ): M | undefined {
+        const best = matches.reduce((best, m) => {
+            const node = getNode(m);
+            return node.matched && (best == null || node.distance < best.distance)
+                ? {item: m, distance: node.distance}
+                : best;
+        }, undefined as undefined | {item: M; distance: number});
+        return best?.item;
     }
 
     /**
@@ -58,13 +56,13 @@ export class FuzzyWordMatcher {
      */
     public getMatch(text: string): {matched: boolean; distance: number} {
         // Execute the DFA
-        const match = this.DFA.execute(text);
+        const matches = this.NFA.execute(text);
 
         // Find the best match
-        const best = match?.sources && this.getBestMatch(match?.sources);
+        const best = this.getBestMatch(matches, node => node);
 
         // Return the result
-        if (best) return {matched: true, distance: best.metadata.distance};
+        if (best) return {matched: true, distance: best.distance};
         return {matched: false, distance: Infinity};
     }
 
@@ -76,81 +74,34 @@ export class FuzzyWordMatcher {
     public getMatchData(
         text: string
     ): {matched: boolean; distance: number; alterations: IFuzzyWordMatch[]} {
-        const match = this.DFA.executeTraced(text);
+        const matches = this.NFA.executeTraced(text);
+        const best = this.getBestMatch(matches, ({final}) => final);
+        const trace = best?.getPath();
 
-        if (match.finished) {
-            // Find the best match
-            const best = match?.final.sources && this.getBestMatch(match?.final.sources);
-
-            if (best) {
-                // If a best match was found
-                const changes = match.path.reduceRight(
-                    ({last, changes}, item, i) => {
-                        if (!last) return {};
-
-                        // Get all transitions that lead to the correct next node
-                        const sourceTransition = item.transition.sources.find(
-                            transition => transition.to == last.ID
-                        );
-
-                        // Follow any empty transitions until a character transition was used
-                        let initTransition = sourceTransition;
-                        const transitions = [];
-                        while (initTransition?.type == "empty") {
-                            transitions.unshift(initTransition);
-                            initTransition = item.transition.sources.find(
-                                transition => transition.to == initTransition?.from
-                            );
-                        }
-                        if (initTransition) transitions.unshift(initTransition);
-
-                        // Obtain a combination of previous node and transition leading to the next node
-                        const source = item.node.sources.find(
-                            s => s.ID == initTransition?.from,
-                            null
-                        );
-
-                        // Store the proper data of the transition, and store the previous node
-                        if (!source) return {};
-                        return {
-                            changes: [
-                                ...transitions.map(({metadata}, ti) => ({
-                                    type: metadata.type,
-                                    query: {
-                                        index: metadata.index,
-                                        character: metadata.character ?? "",
-                                    },
-                                    target: {
-                                        index: i,
-                                        character: ti == 0 ? text[i] : "",
-                                    },
-                                })),
-                                ...changes,
-                            ],
-                            last: source,
-                        };
-                    },
-                    {changes: [] as IFuzzyWordMatch[], last: best}
-                )?.changes;
-                // TODO: test what the changes data is like when having 2 consequetive skips
-
-                if (changes) {
-                    // Map the transition metadata to the correct format
-                    return {
-                        matched: true,
-                        distance: best.metadata.distance,
-                        alterations: changes,
+        // Convert the NFA trace to an alterations array
+        if (best && trace) {
+            const alterations = trace.reduce(
+                ({alterations, index}, {transition}) => {
+                    const target = {
+                        index,
+                        character: transition.type == "skip" ? "" : text[index],
                     };
-                } else {
-                    // I don't think this can occur, but I'm not positive, so this is a safe-ish failure case
-                    console.error("Didn't manage to find a path", text, match);
-                    return {
-                        matched: true,
-                        distance: best.metadata.distance,
-                        alterations: [],
+                    const query = {
+                        index: transition.index,
+                        character: transition.character ?? "",
                     };
-                }
-            }
+                    return {
+                        alterations: [
+                            ...alterations,
+                            {target, query, type: transition.type},
+                        ],
+                        index: transition.type == "skip" ? index : index + 1,
+                    };
+                },
+                {alterations: [] as IFuzzyWordMatch[], index: 0}
+            )?.alterations;
+
+            return {matched: true, distance: best.final.distance, alterations};
         }
 
         return {matched: false, distance: Infinity, alterations: []};

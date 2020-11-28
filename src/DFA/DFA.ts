@@ -1,13 +1,14 @@
-import {INormalizedNFANode} from "../NFA/_types/INormalizedNFANode";
 import {INormalizedNFATemplate} from "../NFA/_types/INormalizedNFATemplate";
-import {INormalizedNFATransition} from "../NFA/_types/INormalizedNFATransition";
-import {convertNFATemplateToDFATemplate} from "./convertNFATemplateToDFATemplate";
+import {convertNFATemplateToDFATemplate} from "./NFADFA/convertNFATemplateToDFATemplate";
 import {INormalizedDFANode} from "./_types/INormalizedDFANode";
 import {INormalizedDFATemplate} from "./_types/INormalizedDFATemplate";
-import {IDFANFANodeData} from "./_types/NFAconversion/IDFANFANodeData";
-import {IDFANFATransitionData} from "./_types/NFAconversion/IDFANFATransitionData";
+import {INormalizedDFATransition} from "./_types/INormalizedDFATransition";
 
 export const remainingCode = "re";
+
+/**
+ * A class to represent deterministic finite automata and their operations
+ */
 export class DFA<N, T> {
     // The DFA structure itself
     protected nodes: INormalizedDFANode<N, T>[];
@@ -24,6 +25,17 @@ export class DFA<N, T> {
     }
 
     /**
+     * Retrieves the character code of a given transition
+     * @param transition The transition to get a code for the transition character for
+     * @returns The character code
+     */
+    protected getCharacterCode(transition: INormalizedDFATransition<T>): string {
+        return transition.type == "character" && transition.character
+            ? transition.character
+            : remainingCode;
+    }
+
+    /**
      * Initializes the DFA structure
      * @param template The DFA template
      */
@@ -35,12 +47,11 @@ export class DFA<N, T> {
         if (initial === undefined) throw Error("Initial state can't be found");
         this.initial = initial;
         this.nodes = template.nodes;
+
         this.transitions = template.nodes.map((node, i) =>
             Object.fromEntries(
                 node.transitions.map(trans => [
-                    trans.type == "character" && trans.character
-                        ? trans.character
-                        : remainingCode,
+                    this.getCharacterCode(trans),
                     nodeMap.get(trans.to) as number,
                 ])
             )
@@ -50,9 +61,7 @@ export class DFA<N, T> {
         this.traceTransitions = template.nodes.map((node, i) =>
             Object.fromEntries(
                 node.transitions.map(trans => [
-                    trans.type == "character" && trans.character
-                        ? trans.character
-                        : remainingCode,
+                    this.getCharacterCode(trans),
                     {state: nodeMap.get(trans.to) as number, metadata: trans.metadata},
                 ])
             )
@@ -83,7 +92,7 @@ export class DFA<N, T> {
     }
 
     /**
-     * Executes the DFA on the given input, and keeps track of intermediate steps
+     * Executes the DFA on the given input, and returns the metadata of the trace
      * @param input The input to execute the DFA on
      * @returns The metadata
      */
@@ -110,16 +119,5 @@ export class DFA<N, T> {
         // Return the result
         const node = this.nodes[state];
         return {finished: true, final: node.metadata, path};
-    }
-
-    /**
-     * Creates a DFA equivalent to a given NFA template
-     * @param template The NFA template to create an DFA automata from
-     * @returns The DFA instance
-     */
-    public static fromNFATemplate<N, T>(
-        template: INormalizedNFATemplate<N, T>
-    ): DFA<IDFANFANodeData<N, T>, IDFANFATransitionData<T>> {
-        return new DFA(convertNFATemplateToDFATemplate(template));
     }
 }

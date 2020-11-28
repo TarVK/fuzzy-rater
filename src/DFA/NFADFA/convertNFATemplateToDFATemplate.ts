@@ -1,10 +1,10 @@
-import {INormalizedNFANode} from "../NFA/_types/INormalizedNFANode";
-import {INormalizedNFATemplate} from "../NFA/_types/INormalizedNFATemplate";
-import {INormalizedNFATransition} from "../NFA/_types/INormalizedNFATransition";
-import {IDFANFANode} from "./_types/NFAconversion/IDFANFANode";
-import {IDFANFATemplate} from "./_types/NFAconversion/IDFANFATemplate";
-import {IDFANFATransition} from "./_types/NFAconversion/IDFANFATransition";
-import {IAugmentedNFATransition} from "./_types/NFAconversion/IDFANFATransitionData";
+import {INormalizedNFANode} from "../../NFA/_types/INormalizedNFANode";
+import {INormalizedNFATemplate} from "../../NFA/_types/INormalizedNFATemplate";
+import {INormalizedNFATransition} from "../../NFA/_types/INormalizedNFATransition";
+import {IDFANFANode} from "./_types/INFADFANode";
+import {INFADFATemplate} from "./_types/INFADFATemplate";
+import {INFADFATransition} from "./_types/INFADFATransition";
+import {IAugmentedNFATransition} from "./_types/INFADFATransitionData";
 
 /**
  * Converts the nfa input to a dfa input
@@ -13,7 +13,7 @@ import {IAugmentedNFATransition} from "./_types/NFAconversion/IDFANFATransitionD
  */
 export function convertNFATemplateToDFATemplate<N, T>(
     nodes: INormalizedNFATemplate<N, T>
-): IDFANFATemplate<N, T> {
+): INFADFATemplate<N, T> {
     const nodeMap = new Map<string, INormalizedNFANode<N, T>>(
         nodes.map(node => [node.ID, node])
     );
@@ -75,7 +75,7 @@ export function getCharacterTransition<N, T>(
     template: Map<string, INormalizedNFANode<N, T>>,
     nodes: INormalizedNFANode<N, T>[],
     char: string
-): {transition: IDFANFATransition<T>; to: INormalizedNFANode<N, T>[]} {
+): {transition: INFADFATransition<T>; to: INormalizedNFANode<N, T>[]} {
     const transitions = [] as IAugmentedNFATransition<T>[];
 
     // Obtain the transitions for each node for this character
@@ -123,7 +123,7 @@ export function getCharacterTransition<N, T>(
 export function getRemainingTransition<N, T>(
     template: Map<string, INormalizedNFANode<N, T>>,
     nodes: INormalizedNFANode<N, T>[]
-): {transition: IDFANFATransition<T>; to: INormalizedNFANode<N, T>[]} {
+): {transition: INFADFATransition<T>; to: INormalizedNFANode<N, T>[]} {
     const transitions = [] as IAugmentedNFATransition<T>[];
 
     // Obtain the transitions for each node for this character

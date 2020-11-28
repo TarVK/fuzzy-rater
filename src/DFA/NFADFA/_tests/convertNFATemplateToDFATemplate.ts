@@ -1,7 +1,7 @@
-import {INormalizedNFANode} from "../../NFA/_types/INormalizedNFANode";
-import {INormalizedNFATemplate} from "../../NFA/_types/INormalizedNFATemplate";
+import {INormalizedNFANode} from "../../../NFA/_types/INormalizedNFANode";
+import {INormalizedNFATemplate} from "../../../NFA/_types/INormalizedNFATemplate";
 import {convertNFATemplateToDFATemplate} from "../convertNFATemplateToDFATemplate";
-import {IDFANFATemplate} from "../_types/NFAconversion/IDFANFATemplate";
+import {INFADFATemplate} from "../_types/INFADFATemplate";
 
 /**
  * Adds the given data to each object in an array
@@ -131,7 +131,7 @@ describe("convertNFATemplateToDFATemplate", () => {
 
         const dfa = convertNFATemplateToDFATemplate(nfa);
 
-        const dfaTest: IDFANFATemplate<undefined, undefined> = {
+        const dfaTest: INFADFATemplate<undefined, undefined> = {
             initial: "{a}",
             nodes: [
                 {
