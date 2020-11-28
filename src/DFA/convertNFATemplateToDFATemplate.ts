@@ -4,6 +4,7 @@ import {INormalizedNFATransition} from "../NFA/_types/INormalizedNFATransition";
 import {IDFANFANode} from "./_types/NFAconversion/IDFANFANode";
 import {IDFANFATemplate} from "./_types/NFAconversion/IDFANFATemplate";
 import {IDFANFATransition} from "./_types/NFAconversion/IDFANFATransition";
+import {IAugmentedNFATransition} from "./_types/NFAconversion/IDFANFATransitionData";
 
 /**
  * Converts the nfa input to a dfa input
@@ -19,7 +20,7 @@ export function convertNFATemplateToDFATemplate<N, T>(
     const outMap = new Map<string, IDFANFANode<N, T>>();
 
     // Get the initial nodes
-    const initNodes = getReachableNodes(
+    const {nodes: initNodes} = getReachableNodes(
         nodeMap,
         nodes.filter(({initial}) => initial)
     );
@@ -75,26 +76,30 @@ export function getCharacterTransition<N, T>(
     nodes: INormalizedNFANode<N, T>[],
     char: string
 ): {transition: IDFANFATransition<T>; to: INormalizedNFANode<N, T>[]} {
-    const transitions = [] as INormalizedNFATransition<T>[];
+    const transitions = [] as IAugmentedNFATransition<T>[];
 
     // Obtain the transitions for each node for this character
     nodes.forEach(node => {
         const charTransitions = node.transitions.filter(
             ({type, character}) => type == "character" && character == char
         );
+        let nodeTransitions: INormalizedNFATransition<T>[];
         if (charTransitions.length > 0) {
-            transitions.push(...charTransitions);
+            nodeTransitions = charTransitions;
         } else {
-            const otherTransitions = node.transitions.filter(
-                ({type}) => type == "remaining"
-            );
-            transitions.push(...otherTransitions);
+            nodeTransitions = node.transitions.filter(({type}) => type == "remaining");
         }
+        nodeTransitions.forEach(transition =>
+            transitions.push({from: node.ID, ...transition})
+        );
     });
 
     // Get the ID of the end of the transition
     const toNodesDirect = transitions.map(transition => transition.to);
-    const toNodes = getReachableNodes(template, getNodesFromIDs(template, toNodesDirect));
+    const {nodes: toNodes, emptyTransitions} = getReachableNodes(
+        template,
+        getNodesFromIDs(template, toNodesDirect)
+    );
     const to = createID(toNodes);
 
     // Construct the transition
@@ -103,7 +108,7 @@ export function getCharacterTransition<N, T>(
             to,
             type: "character",
             character: char,
-            metadata: {sources: transitions},
+            metadata: {sources: [...transitions, ...emptyTransitions]},
         },
         to: toNodes,
     };
@@ -119,19 +124,24 @@ export function getRemainingTransition<N, T>(
     template: Map<string, INormalizedNFANode<N, T>>,
     nodes: INormalizedNFANode<N, T>[]
 ): {transition: IDFANFATransition<T>; to: INormalizedNFANode<N, T>[]} {
-    const transitions = [] as INormalizedNFATransition<T>[];
+    const transitions = [] as IAugmentedNFATransition<T>[];
 
     // Obtain the transitions for each node for this character
     nodes.forEach(node => {
         const remainingTransitions = node.transitions.filter(
             ({type}) => type == "remaining"
         );
-        transitions.push(...remainingTransitions);
+        remainingTransitions.forEach(transition =>
+            transitions.push({from: node.ID, ...transition})
+        );
     });
 
     // Get the ID of the end of the transition
     const toNodesDirect = transitions.map(transition => transition.to);
-    const toNodes = getReachableNodes(template, getNodesFromIDs(template, toNodesDirect));
+    const {nodes: toNodes, emptyTransitions} = getReachableNodes(
+        template,
+        getNodesFromIDs(template, toNodesDirect)
+    );
     const to = createID(toNodes);
 
     // Construct the transition
@@ -139,7 +149,7 @@ export function getRemainingTransition<N, T>(
         transition: {
             to,
             type: "remaining",
-            metadata: {sources: transitions},
+            metadata: {sources: [...transitions, ...emptyTransitions]},
         },
         to: toNodes,
     };
@@ -173,17 +183,24 @@ export function getAvailableTransitionCharacter<N, T>(
 export function getReachableNodes<N, T>(
     template: Map<string, INormalizedNFANode<N, T>>,
     nodes: INormalizedNFANode<N, T>[]
-): INormalizedNFANode<N, T>[] {
+): {nodes: INormalizedNFANode<N, T>[]; emptyTransitions: IAugmentedNFATransition<T>[]} {
     const reachableNodes = new Set(nodes);
+    const emptyTransitions: IAugmentedNFATransition<T>[] = [];
     for (let node of reachableNodes) {
-        const emptyTransitions = node.transitions.filter(({type}) => type == "empty");
+        const nodeEmptyTransitions = node.transitions.filter(({type}) => type == "empty");
         const transitionNodes = getNodesFromIDs(
             template,
-            emptyTransitions.map(({to}) => to)
+            nodeEmptyTransitions.map(({to}) => to)
         );
         transitionNodes.forEach(node => reachableNodes.add(node));
+        nodeEmptyTransitions.forEach(transition =>
+            emptyTransitions.push({from: node.ID, ...transition})
+        );
     }
-    return Array.from(reachableNodes);
+    return {
+        nodes: Array.from(reachableNodes),
+        emptyTransitions: Array.from(emptyTransitions),
+    };
 }
 
 /**

@@ -1,18 +1,21 @@
 import {convertNFATemplateToDFATemplate} from "./DFA/convertNFATemplateToDFATemplate";
-import {DFA} from "./DFA/DFA";
-import {createFuzzyNFATemplate} from "./fuzzyRate/createFuzzyNFATemplate";
+import {FuzzyWordMatcher} from "./fuzzyRate/FuzzyWordMatcher";
 
 // TODO: currently this file just contains test setups, will be replaced by module exports
-const s = Date.now();
-const nfaTemplate = createFuzzyNFATemplate("something", 2);
-const dfaTemplate = convertNFATemplateToDFATemplate(nfaTemplate);
-const dfa = new DFA(dfaTemplate);
-const e = Date.now() - s;
+let t1 = -Date.now();
+const matcher = new FuzzyWordMatcher("something", 2);
+t1 += Date.now();
 
-const s2 = Date.now();
+let t2 = -Date.now();
 for (let i = 0; i < 1e5; i++) {
-    dfa.executeTraced("this is really something very cool right?");
+    matcher.getMatch("this is really something very cool right?");
 }
-const e2 = Date.now() - s2;
+t2 += Date.now();
 
-console.log(e, dfaTemplate.nodes.length, e2);
+let t3 = -Date.now();
+for (let i = 0; i < 1e5; i++) {
+    matcher.getMatchData("this is really something very cool right?");
+}
+t3 += Date.now();
+
+console.log(t1, t2, t3);

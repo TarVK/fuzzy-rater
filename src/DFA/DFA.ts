@@ -4,6 +4,8 @@ import {INormalizedNFATransition} from "../NFA/_types/INormalizedNFATransition";
 import {convertNFATemplateToDFATemplate} from "./convertNFATemplateToDFATemplate";
 import {INormalizedDFANode} from "./_types/INormalizedDFANode";
 import {INormalizedDFATemplate} from "./_types/INormalizedDFATemplate";
+import {IDFANFANodeData} from "./_types/NFAconversion/IDFANFANodeData";
+import {IDFANFATransitionData} from "./_types/NFAconversion/IDFANFATransitionData";
 
 export const remainingCode = "re";
 export class DFA<N, T> {
@@ -117,10 +119,7 @@ export class DFA<N, T> {
      */
     public static fromNFATemplate<N, T>(
         template: INormalizedNFATemplate<N, T>
-    ): DFA<
-        {sources: INormalizedNFANode<N, T>[]},
-        {sources: INormalizedNFATransition<T>[]}
-    > {
+    ): DFA<IDFANFANodeData<N, T>, IDFANFATransitionData<T>> {
         return new DFA(convertNFATemplateToDFATemplate(template));
     }
 }

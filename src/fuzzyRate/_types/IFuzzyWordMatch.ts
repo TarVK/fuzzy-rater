@@ -1,5 +1,3 @@
-import {IFuzzyTransitionData} from "./IFuzzyTransitionData";
-
 export type IFuzzyWordMatch = {
     /**
      * The type of transition
@@ -10,12 +8,14 @@ export type IFuzzyWordMatch = {
      * - ignore: Any text before or after a query match
      */
     type: "insert" | "skip" | "match" | "replace" | "ignore";
-    /**
-     * The character that was present in the query
-     */
-    queryCharacter: string;
-    /**
-     * The character that was present in the input text
-     */
-    targetCharacter: string;
+    /** The data specified in the query */
+    query: {
+        character: string;
+        index: number;
+    };
+    /** The data specified in the target */
+    target: {
+        character: string;
+        index: number;
+    };
 };

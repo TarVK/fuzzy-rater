@@ -89,31 +89,45 @@ export class FuzzyWordMatcher {
                         if (!last) return {};
 
                         // Get all transitions that lead to the correct next node
-                        const possibleTransitions = item.transition.sources.filter(
+                        const sourceTransition = item.transition.sources.find(
                             transition => transition.to == last.ID
                         );
 
-                        // Obtain a combination of previous node and transition leading to the next node
-                        const data = item.node.sources.reduce((c, s) => {
-                            if (c) return c;
-                            const trans = possibleTransitions.find(transition =>
-                                s.transitions.includes(transition)
+                        // Follow any empty transitions until a character transition was used
+                        let initTransition = sourceTransition;
+                        const transitions = [];
+                        while (initTransition?.type == "empty") {
+                            transitions.unshift(initTransition);
+                            initTransition = item.transition.sources.find(
+                                transition => transition.to == initTransition?.from
                             );
-                            if (trans) return {source: s, transition: trans};
-                        }, null);
+                        }
+                        if (initTransition) transitions.unshift(initTransition);
+
+                        // Obtain a combination of previous node and transition leading to the next node
+                        const source = item.node.sources.find(
+                            s => s.ID == initTransition?.from,
+                            null
+                        );
 
                         // Store the proper data of the transition, and store the previous node
-                        if (!data) return {};
+                        if (!source) return {};
                         return {
                             changes: [
-                                {
-                                    queryCharacter: "",
-                                    ...data.transition.metadata,
-                                    targetCharacter: text[i],
-                                },
+                                ...transitions.map(({metadata}, ti) => ({
+                                    type: metadata.type,
+                                    query: {
+                                        index: metadata.index,
+                                        character: metadata.character ?? "",
+                                    },
+                                    target: {
+                                        index: i,
+                                        character: ti == 0 ? text[i] : "",
+                                    },
+                                })),
                                 ...changes,
                             ],
-                            last: data.source,
+                            last: source,
                         };
                     },
                     {changes: [] as IFuzzyWordMatch[], last: best}

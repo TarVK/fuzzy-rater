@@ -71,6 +71,7 @@ export function getTransitions(
             character: nextChar,
             metadata: {
                 type: "match",
+                index: nextIndex,
                 character: nextChar,
             },
         });
@@ -82,6 +83,7 @@ export function getTransitions(
                 type: "empty",
                 metadata: {
                     type: "skip",
+                    index: nextIndex,
                     character: nextChar,
                 },
             });
@@ -92,6 +94,7 @@ export function getTransitions(
                 type: "remaining",
                 metadata: {
                     type: "replace",
+                    index: nextIndex,
                     character: nextChar,
                 },
             });
@@ -103,7 +106,10 @@ export function getTransitions(
         transitions.push({
             to: getID(query, dist + 1, index),
             type: "remaining",
-            metadata: {type: "insert"},
+            metadata: {
+                index: nextIndex,
+                type: "insert",
+            },
         });
     }
 
@@ -112,13 +118,19 @@ export function getTransitions(
         transitions.push({
             to: getID(query, dist, index),
             type: "remaining",
-            metadata: {type: "ignore"},
+            metadata: {
+                index: nextIndex,
+                type: "ignore",
+            },
         });
         transitions.push({
             to: getID(query, dist, index),
             type: "character",
             character: nextChar,
-            metadata: {type: "ignore"},
+            metadata: {
+                index: nextIndex,
+                type: "ignore",
+            },
         });
     }
 
@@ -127,7 +139,10 @@ export function getTransitions(
         transitions.push({
             to: getID(query, dist, index),
             type: "remaining",
-            metadata: {type: "ignore"},
+            metadata: {
+                index: nextIndex,
+                type: "ignore",
+            },
         });
     }
 

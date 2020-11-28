@@ -3,6 +3,16 @@ import {INormalizedNFATemplate} from "../../NFA/_types/INormalizedNFATemplate";
 import {convertNFATemplateToDFATemplate} from "../convertNFATemplateToDFATemplate";
 import {IDFANFATemplate} from "../_types/NFAconversion/IDFANFATemplate";
 
+/**
+ * Adds the given data to each object in an array
+ * @param items The items to add data to
+ * @param add The data to add
+ * @returns The items with the data added
+ */
+function add<T extends object, B extends object>(items: T[], add: B): (T & B)[] {
+    return items.map(item => ({...item, ...add}));
+}
+
 describe("convertNFATemplateToDFATemplate", () => {
     it("Should obtain the proper initial state", () => {
         const nfa: INormalizedNFATemplate<undefined, undefined> = [
@@ -131,7 +141,7 @@ describe("convertNFATemplateToDFATemplate", () => {
                             to: "{b,c}",
                             type: "character",
                             character: "a",
-                            metadata: {sources: a.transitions},
+                            metadata: {sources: add(a.transitions, {from: "a"})},
                         },
                         {
                             to: "{}",
@@ -148,24 +158,34 @@ describe("convertNFATemplateToDFATemplate", () => {
                             to: "{d,f}",
                             type: "character",
                             character: "b",
-                            metadata: {sources: [b.transitions[0], c.transitions[0]]},
+                            metadata: {
+                                sources: [
+                                    {...b.transitions[0], from: "b"},
+                                    {...c.transitions[0], from: "c"},
+                                ],
+                            },
                         },
                         {
                             to: "{e,h}",
                             type: "character",
                             character: "c",
-                            metadata: {sources: [b.transitions[1], c.transitions[2]]},
+                            metadata: {
+                                sources: [
+                                    {...b.transitions[1], from: "b"},
+                                    {...c.transitions[2], from: "c"},
+                                ],
+                            },
                         },
                         {
                             to: "{g}",
                             type: "character",
                             character: "d",
-                            metadata: {sources: [c.transitions[1]]},
+                            metadata: {sources: [{...c.transitions[1], from: "c"}]},
                         },
                         {
                             to: "{h}",
                             type: "remaining",
-                            metadata: {sources: [c.transitions[2]]},
+                            metadata: {sources: [{...c.transitions[2], from: "c"}]},
                         },
                     ],
                     metadata: {sources: [b, c]},

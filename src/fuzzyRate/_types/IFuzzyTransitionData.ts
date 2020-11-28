@@ -12,4 +12,6 @@ export type IFuzzyTransitionData = {
      * The query character that was skipped or matched, or replaced. Inserted/ignored characters are only defined by remaining transitions, so we don't statically know the character
      */
     character?: string;
+    /** The current position in the query string */
+    index: number;
 };
