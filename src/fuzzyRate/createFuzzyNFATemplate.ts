@@ -8,11 +8,13 @@ import {IFuzzyTransitionData} from "./_types/IFuzzyTransitionData";
  * Creates a new dfa template based on the query and max distance
  * @param query The query to create a template for
  * @param maxDistance The maximal allowed distance
+ * @param exitOnMatch Whether the NFA should exit out of the node after match
  * @returns A dfa template
  */
 export function createFuzzyNFATemplate(
     query: string,
-    maxDistance: number
+    maxDistance: number,
+    exitOnMatch: boolean = false
 ): INormalizedNFATemplate<IFuzzyNodeData, IFuzzyTransitionData> {
     const nodes = [] as INormalizedNFANode<IFuzzyNodeData, IFuzzyTransitionData>[];
 
@@ -33,7 +35,9 @@ export function createFuzzyNFATemplate(
             nodes.push({
                 ID: getID(query, dist, i),
                 initial: false,
-                transitions: [...getTransitions(query, maxDistance, dist, i)],
+                transitions: [
+                    ...getTransitions(query, maxDistance, dist, i, exitOnMatch),
+                ],
                 metadata: {
                     matched: i + 1 == query.length,
                     distance: dist,
@@ -51,13 +55,15 @@ export function createFuzzyNFATemplate(
  * @param maxDist The maximal allowed distance
  * @param dist The current distance
  * @param index The index of character matched so far
+ * @param exitOnMatch Whether the NFA should exit out of the node after match
  * @returns The set of transitions from this node
  */
 export function getTransitions(
     query: string,
     maxDist: number,
     dist: number,
-    index: number
+    index: number,
+    exitOnMatch: boolean = false
 ): INormalizedNFATransition<IFuzzyTransitionData>[] {
     const nextIndex = index + 1;
     const nextChar = query[nextIndex];
@@ -135,15 +141,27 @@ export function getTransitions(
     }
 
     if (nextIndex == query.length) {
-        // Match any number of characters after query
-        transitions.push({
-            to: getID(query, dist, index),
-            type: "remaining",
-            metadata: {
-                index: nextIndex,
-                type: "ignore",
-            },
-        });
+        if (!exitOnMatch) {
+            // Match any number of characters after query
+            transitions.push({
+                to: getID(query, dist, index),
+                type: "remaining",
+                metadata: {
+                    index: nextIndex,
+                    type: "ignore",
+                },
+            });
+        } else {
+            // Match any number of characters after query
+            transitions.push({
+                to: getID(query, 0, -1),
+                type: "empty",
+                metadata: {
+                    index: nextIndex,
+                    type: "ignore", // TODO: add a dedicated match
+                },
+            });
+        }
     }
 
     return transitions;

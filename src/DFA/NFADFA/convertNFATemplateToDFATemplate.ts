@@ -4,7 +4,12 @@ import {INormalizedNFATransition} from "../../NFA/_types/INormalizedNFATransitio
 import {IDFANFANode} from "./_types/INFADFANode";
 import {INFADFATemplate} from "./_types/INFADFATemplate";
 import {INFADFATransition} from "./_types/INFADFATransition";
-import {IAugmentedNFATransition} from "./_types/INFADFATransitionData";
+import {
+    IAugmentedNFATransition,
+    INFADFATransitionData,
+} from "./_types/INFADFATransitionData";
+import {INFADFANodeData} from "./_types/INFADFANodeData";
+import {INFADFAMetaGetters} from "./_types/INFADFAMetaGetters";
 
 /**
  * Converts the nfa input to a dfa input
@@ -13,11 +18,27 @@ import {IAugmentedNFATransition} from "./_types/INFADFATransitionData";
  */
 export function convertNFATemplateToDFATemplate<N, T>(
     nodes: INormalizedNFATemplate<N, T>
-): INFADFATemplate<N, T> {
+): INFADFATemplate<N, T>;
+
+/**
+ * Converts the nfa input to a dfa input
+ * @param nodes The nodes for a nfa automaton
+ * @param getMeta A function to combine metadata of nodes and transitions, which can be used to more efficiently extract data later
+ * @returns The dfa equivalent automaton template
+ */
+export function convertNFATemplateToDFATemplate<N, T, CN = unknown, CT = unknown>(
+    nodes: INormalizedNFATemplate<N, T>,
+    getMeta: INFADFAMetaGetters<N, T, CN, CT>
+): INFADFATemplate<N, T, CN, CT>;
+
+export function convertNFATemplateToDFATemplate<N, T, CN = unknown, CT = unknown>(
+    nodes: INormalizedNFATemplate<N, T>,
+    getMeta?: INFADFAMetaGetters<N, T, CN, CT>
+): INFADFATemplate<N, T, CN, CT> {
     const nodeMap = new Map<string, INormalizedNFANode<N, T>>(
         nodes.map(node => [node.ID, node])
     );
-    const outMap = new Map<string, IDFANFANode<N, T>>();
+    const outMap = new Map<string, IDFANFANode<N, T, CN, CT>>();
 
     // Get the initial nodes
     const {nodes: initNodes} = getReachableNodes(
@@ -40,22 +61,30 @@ export function convertNFATemplateToDFATemplate<N, T>(
         const transitionChars = getAvailableTransitionCharacter(nodes);
 
         const characterTransitions = transitionChars.map(char => {
-            const {transition, to} = getCharacterTransition(nodeMap, nodes, char);
+            const {transition, to} = getCharacterTransition(
+                nodeMap,
+                nodes,
+                char,
+                getMeta?.transitionMeta
+            );
             stack.push(to);
             return transition;
         });
 
         const {transition: remainingTransition, to} = getRemainingTransition(
             nodeMap,
-            nodes
+            nodes,
+            getMeta?.transitionMeta
         );
         stack.push(to);
 
         // Create and store the node
-        const node: IDFANFANode<N, T> = {
+        const node: IDFANFANode<N, T, CN, CT> = {
             ID,
             transitions: [...characterTransitions, remainingTransition],
-            metadata: {sources: nodes},
+            metadata: getMeta
+                ? {sources: nodes, ...getMeta.nodeMeta(nodes)}
+                : ({sources: nodes} as INFADFANodeData<N, T, CN>),
         };
         outMap.set(ID, node);
     }
@@ -69,13 +98,15 @@ export function convertNFATemplateToDFATemplate<N, T>(
  * @param template All the nfa input nodes
  * @param nodes The current state
  * @param char The character to transition on
+ * @param getMeta An optional function to get extra metadata for the transition
  * @returns The transition for this character
  */
-export function getCharacterTransition<N, T>(
+export function getCharacterTransition<N, T, CT = unknown>(
     template: Map<string, INormalizedNFANode<N, T>>,
     nodes: INormalizedNFANode<N, T>[],
-    char: string
-): {transition: INFADFATransition<T>; to: INormalizedNFANode<N, T>[]} {
+    char: string,
+    getMeta?: (sources: INormalizedNFATransition<T>[]) => CT
+): {transition: INFADFATransition<T, CT>; to: INormalizedNFANode<N, T>[]} {
     const transitions = [] as IAugmentedNFATransition<T>[];
 
     // Obtain the transitions for each node for this character
@@ -103,12 +134,15 @@ export function getCharacterTransition<N, T>(
     const to = createID(toNodes);
 
     // Construct the transition
+    const sources = [...transitions, ...emptyTransitions];
     return {
         transition: {
             to,
             type: "character",
             character: char,
-            metadata: {sources: [...transitions, ...emptyTransitions]},
+            metadata: getMeta
+                ? {sources, ...getMeta(sources)}
+                : ({sources} as INFADFATransitionData<T, CT>),
         },
         to: toNodes,
     };
@@ -118,12 +152,14 @@ export function getCharacterTransition<N, T>(
  * Retrieves the transition for all characters for which no specific transition exists
  * @param template All the nfa input nodes
  * @param nodes The current state
+ * @param getMeta An optional function to get extra metadata for the transition
  * @returns The transition for the remaining characters
  */
-export function getRemainingTransition<N, T>(
+export function getRemainingTransition<N, T, CT = unknown>(
     template: Map<string, INormalizedNFANode<N, T>>,
-    nodes: INormalizedNFANode<N, T>[]
-): {transition: INFADFATransition<T>; to: INormalizedNFANode<N, T>[]} {
+    nodes: INormalizedNFANode<N, T>[],
+    getMeta?: (sources: INormalizedNFATransition<T>[]) => CT
+): {transition: INFADFATransition<T, CT>; to: INormalizedNFANode<N, T>[]} {
     const transitions = [] as IAugmentedNFATransition<T>[];
 
     // Obtain the transitions for each node for this character
@@ -145,11 +181,14 @@ export function getRemainingTransition<N, T>(
     const to = createID(toNodes);
 
     // Construct the transition
+    const sources = [...transitions, ...emptyTransitions];
     return {
         transition: {
             to,
             type: "remaining",
-            metadata: {sources: [...transitions, ...emptyTransitions]},
+            metadata: getMeta
+                ? {sources, ...getMeta(sources)}
+                : ({sources} as INFADFATransitionData<T, CT>),
         },
         to: toNodes,
     };

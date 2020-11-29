@@ -2,14 +2,17 @@ import {FuzzyWordMatcher} from "../FuzzyWordMatcher";
 import {createFuzzyNFATemplate} from "../createFuzzyNFATemplate";
 import {NFA} from "../../NFA/NFA";
 import {NFADFA} from "../../DFA/NFADFA/NFADFA";
+import {FuzzyMultiWordMatcher} from "../FuzzyMultiWordMatcher";
 
 describe("FuzzyRate", () => {
     describe("createFuzzyNFATemplate", () => {
         const s = Date.now();
-        const matcher = new FuzzyWordMatcher("something", 2);
+        const matcher = new FuzzyMultiWordMatcher("something", 2);
         const e = Date.now() - s;
 
-        const match = matcher.getMatchData("I like somehig yes, ya somehig is good");
+        const match = matcher.getMatch(
+            "this is really something very cool right? or somthng"
+        );
         debugger;
     });
     describe("createFuzzyNFATemplate", () => {

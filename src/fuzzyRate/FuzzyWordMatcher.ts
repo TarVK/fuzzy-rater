@@ -54,7 +54,7 @@ export class FuzzyWordMatcher {
      * @param text The text to find the query word in
      * @returns Whether the text matched, and the distance from the query word
      */
-    public getMatch(text: string): {matched: boolean; distance: number} {
+    public getMatch(text: string): IFuzzyNodeData {
         // Execute the DFA
         const matches = this.NFA.execute(text);
 
@@ -71,9 +71,7 @@ export class FuzzyWordMatcher {
      * @param text The text to find the query word in
      * @returns Whether the text matched, and the distance from the query word, and how the text differed
      */
-    public getMatchData(
-        text: string
-    ): {matched: boolean; distance: number; alterations: IFuzzyWordMatch[]} {
+    public getMatchData(text: string): IFuzzyNodeData & {alterations: IFuzzyWordMatch[]} {
         const matches = this.NFA.executeTraced(text);
         const best = this.getBestMatch(matches, ({final}) => final);
         const trace = best?.getPath();
