@@ -158,7 +158,7 @@ export function getTransitions(
                 type: "empty",
                 metadata: {
                     index: nextIndex,
-                    type: "ignore", // TODO: add a dedicated match
+                    type: "restart",
                 },
             });
         }

@@ -55,7 +55,7 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
      */
     public execute(input: string): N[] {
         const result = this.DFA.execute(input);
-        if (result) result.sources.map(s => s.metadata);
+        if (result) return result.sources.map(s => s.metadata);
         return [];
     }
 
@@ -70,7 +70,7 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
         finished: boolean;
         final: INFADFANodeData<N, T, CN>;
         path: {
-            node: INFADFANodeData<N, T, CN>;
+            fromNode: INFADFANodeData<N, T, CN>;
             transition: INFADFATransitionData<T, CT>;
         }[];
     } {
@@ -83,18 +83,17 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
      * @param input The input to execute the NFA on
      * @returns The metadata of the states teh automaton finished in
      */
-    public executeTraced(input: string): INFADFATrace<N, T>[] {
+    public executeTraced(input: string): INFADFATrace<N, T, CN, CT>[] {
         const result = this.DFA.executeTraced(input);
+
         return result.final.sources.map(s => ({
             final: s.metadata,
             getPath: (
-                chooseTransition: (
-                    to: INormalizedNFANode<N, T>,
-                    transitions: IAugmentedNFATransition<T>[],
-                    allNodes: Record<string, INormalizedNFANode<N, T>>
-                ) => IAugmentedNFATransition<T> | undefined = (to, transitions) =>
+                getTransitionChooser = () => (to, transitions) =>
                     transitions.find(transition => transition.to == to.ID)
             ) => {
+                const chooseTransition = getTransitionChooser(result);
+
                 // If a best match was found
                 const trace = result.path.reduceRight(
                     ({last, trace}, item, i) => {
@@ -104,16 +103,17 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
                         const sourceTransition = chooseTransition(
                             last,
                             item.transition.sources,
+                            i,
                             this.nodes
                         );
 
                         // Follow any empty transitions until a character transition was used
-                        const transitionData: {node: N; transition: T}[] = [];
+                        const transitionData: {fromNode: N; transition: T}[] = [];
                         let initTransition = sourceTransition;
                         while (initTransition?.type == "empty") {
                             transitionData.unshift({
+                                fromNode: this.nodes[initTransition.from].metadata,
                                 transition: initTransition.metadata,
-                                node: this.nodes[initTransition.from].metadata,
                             });
                             initTransition = item.transition.sources.find(
                                 transition => transition.to == initTransition?.from
@@ -121,13 +121,13 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
                         }
 
                         // Obtain a combination of previous node and transition leading to the next node
-                        const source = item.node.sources.find(
+                        const source = item.fromNode.sources.find(
                             s => s.ID == initTransition?.from,
                             null
                         );
                         if (source && initTransition)
                             transitionData.unshift({
-                                node: source.metadata,
+                                fromNode: source.metadata,
                                 transition: initTransition.metadata,
                             });
 
@@ -138,7 +138,7 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
                             last: source,
                         };
                     },
-                    {trace: [] as {node: N; transition: T}[], last: s}
+                    {trace: [] as {fromNode: N; transition: T}[], last: s}
                 )?.trace;
 
                 if (trace) {

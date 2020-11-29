@@ -1,5 +1,6 @@
 import {INormalizedNFATemplate} from "../NFA/_types/INormalizedNFATemplate";
 import {convertNFATemplateToDFATemplate} from "./NFADFA/convertNFATemplateToDFATemplate";
+import {IDFATrace} from "./_types/IDFATrace";
 import {INormalizedDFANode} from "./_types/INormalizedDFANode";
 import {INormalizedDFATemplate} from "./_types/INormalizedDFATemplate";
 import {INormalizedDFATransition} from "./_types/INormalizedDFATransition";
@@ -96,11 +97,9 @@ export class DFA<N, T> {
      * @param input The input to execute the DFA on
      * @returns The metadata
      */
-    public executeTraced(
-        input: string
-    ): {finished: boolean; final: N; path: {node: N; transition: T}[]} {
+    public executeTraced(input: string): {finished: boolean} & IDFATrace<N, T> {
         let state: number = this.initial;
-        const path: {node: N; transition: T}[] = [];
+        const path: {fromNode: N; transition: T}[] = [];
 
         // Step through all characters
         for (let i = 0; i < input.length; i++) {
@@ -111,7 +110,7 @@ export class DFA<N, T> {
 
             const md = this.nodes[state].metadata;
             if (data) {
-                path.push({node: md, transition: data.metadata});
+                path.push({fromNode: md, transition: data.metadata});
                 state = data.state;
             } else return {finished: false, final: md, path};
         }

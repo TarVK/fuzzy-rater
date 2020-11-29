@@ -180,7 +180,7 @@ export class NFA<N, T> {
         return state.map(({node, path}) => ({
             final: this.nodes[node].metadata,
             path: path.map(({node, transition}) => ({
-                node: this.nodes[node].metadata,
+                fromNode: this.nodes[node].metadata,
                 transition,
             })),
         }));

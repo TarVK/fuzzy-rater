@@ -92,7 +92,7 @@ export class FuzzyWordMatcher {
                         alterations: [
                             ...alterations,
                             {target, query, type: transition.type},
-                        ],
+                        ] as IFuzzyWordMatch[], // Doesn't contain 'restart' transition types
                         index: transition.type == "skip" ? index : index + 1,
                     };
                 },

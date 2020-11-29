@@ -34,6 +34,12 @@ for (let i = 0; i < 1e5; i++) {
 }
 t2b += Date.now();
 
+let t3b = -Date.now();
+for (let i = 0; i < 1e5; i++) {
+    multiMatcher.getMatchData("this is really something very cool right? or somthng");
+}
+t3b += Date.now();
+
 // =============================================================================
 let t1c = -Date.now();
 const nfaTemplate = createFuzzyNFATemplate("something", 2);
@@ -47,7 +53,7 @@ for (let i = 0; i < 1e5; i++) {
 t2c += Date.now();
 
 console.log(
-    `matcher setup: ${t1a}, execution: ${t2a}, matchExecution: ${t3a} \nmultiMatcher setup: ${t1b}, execution: ${t2b} \nnfa setup: ${t1c}, execution: ${t2c} \n `
+    `matcher setup: ${t1a}, execution: ${t2a}, matchExecution: ${t3a} \nmultiMatcher setup: ${t1b}, execution: ${t2b}, matchExecution: ${t3b} \nnfa setup: ${t1c}, execution: ${t2c} \n `
 );
 
 // // =============================================================================
