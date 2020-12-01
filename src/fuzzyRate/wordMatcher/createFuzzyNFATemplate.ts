@@ -1,6 +1,6 @@
-import {INormalizedNFANode} from "../NFA/_types/INormalizedNFANode";
-import {INormalizedNFATemplate} from "../NFA/_types/INormalizedNFATemplate";
-import {INormalizedNFATransition} from "../NFA/_types/INormalizedNFATransition";
+import {INormalizedNFANode} from "../../NFA/_types/INormalizedNFANode";
+import {INormalizedNFATemplate} from "../../NFA/_types/INormalizedNFATemplate";
+import {INormalizedNFATransition} from "../../NFA/_types/INormalizedNFATransition";
 import {IFuzzyNodeData} from "./_types/IFuzzyNodeData";
 import {IFuzzyTransitionData} from "./_types/IFuzzyTransitionData";
 

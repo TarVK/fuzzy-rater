@@ -1,8 +1,8 @@
-import {FuzzyWordMatcher} from "./fuzzyRate/FuzzyWordMatcher";
-import {createFuzzyNFATemplate} from "./fuzzyRate/createFuzzyNFATemplate";
+import {FuzzyWordMatcher} from "./fuzzyRate/wordMatcher/FuzzyWordMatcher";
+import {createFuzzyNFATemplate} from "./fuzzyRate/wordMatcher/createFuzzyNFATemplate";
 import {NFA} from "./NFA/NFA";
 import {NFADFA} from "./DFA/NFADFA/NFADFA";
-import {FuzzyMultiWordMatcher} from "./fuzzyRate/FuzzyMultiWordMatcher";
+import {FuzzyMultiWordMatcher} from "./fuzzyRate/wordMatcher/FuzzyMultiWordMatcher";
 
 // TODO: currently this file just contains test setups, will be replaced by module exports
 

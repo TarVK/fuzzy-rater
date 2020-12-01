@@ -2,7 +2,7 @@ import {createFuzzyNFATemplate} from "./createFuzzyNFATemplate";
 import {IFuzzyNodeData} from "./_types/IFuzzyNodeData";
 import {IFuzzyTransitionData} from "./_types/IFuzzyTransitionData";
 import {IFuzzyWordMatch} from "./_types/IFuzzyWordMatch";
-import {NFADFA} from "../DFA/NFADFA/NFADFA";
+import {NFADFA} from "../../DFA/NFADFA/NFADFA";
 
 /**
  * A fuzzy word matcher that can be used to find a word in a number of items.

@@ -1,8 +1,7 @@
-import {FuzzyWordMatcher} from "../FuzzyWordMatcher";
-import {createFuzzyNFATemplate} from "../createFuzzyNFATemplate";
+import {createFuzzyNFATemplate} from "../wordMatcher/createFuzzyNFATemplate";
 import {NFA} from "../../NFA/NFA";
 import {NFADFA} from "../../DFA/NFADFA/NFADFA";
-import {FuzzyMultiWordMatcher} from "../FuzzyMultiWordMatcher";
+import {FuzzyWordMatcher} from "../wordMatcher/FuzzyWordMatcher";
 
 describe("FuzzyRate", () => {
     it("createFuzzyNFATemplate", () => {
