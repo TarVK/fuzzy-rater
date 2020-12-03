@@ -3,6 +3,7 @@ import {createFuzzyNFATemplate} from "./fuzzyRate/wordMatcher/createFuzzyNFATemp
 import {NFA} from "./NFA/NFA";
 import {NFADFA} from "./DFA/NFADFA/NFADFA";
 import {FuzzyMultiWordMatcher} from "./fuzzyRate/wordMatcher/FuzzyMultiWordMatcher";
+import {FuzzyRater} from "./fuzzyRate/FuzzyRater";
 
 // TODO: currently this file just contains test setups, will be replaced by module exports
 
@@ -52,8 +53,36 @@ for (let i = 0; i < 1e5; i++) {
 }
 t2c += Date.now();
 
+console.log("All executions evaluated 100 000 times\n");
+console.log("Evaluating query 'something' with max 2 distance:");
 console.log(
-    `matcher setup: ${t1a}, execution: ${t2a}, matchExecution: ${t3a} \nmultiMatcher setup: ${t1b}, execution: ${t2b}, matchExecution: ${t3b} \nnfa setup: ${t1c}, execution: ${t2c} \n `
+    ` matcher setup: ${t1a}, execution: ${t2a}, matchExecution: ${t3a} \n multiMatcher setup: ${t1b}, execution: ${t2b}, matchExecution: ${t3b} \n nfa setup: ${t1c}, execution: ${t2c} \n `
+);
+
+// =============================================================================
+let t4 = -Date.now();
+const fuzzyRater = new FuzzyRater("some cool stuff");
+t4 += Date.now();
+
+let t5 = -Date.now();
+for (let i = 0; i < 1e5; i++) {
+    fuzzyRater.getScore(
+        "some things can't be some cool stuff while other stuff can be cool"
+    );
+}
+t5 += Date.now();
+
+let t6 = -Date.now();
+for (let i = 0; i < 1e5; i++) {
+    fuzzyRater.getScore(
+        "nothing here should realistically match the input query since it's too different"
+    );
+}
+t6 += Date.now();
+
+console.log("Evaluating query 'some cool stuff' with max 1 distance per word:");
+console.log(
+    `Fuzzy rater setup: ${t4}, execution when matching: ${t5}, execution when not matching: ${t6}`
 );
 
 // // =============================================================================
@@ -73,4 +102,4 @@ console.log(
 // }
 // t5 += Date.now();
 
-// console.log(t1, t2, t3, t4, t5);
+// console.log(t5);

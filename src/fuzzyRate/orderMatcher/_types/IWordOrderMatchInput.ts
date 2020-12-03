@@ -5,4 +5,6 @@ export type IWordOrderMatchInput = {
     index: number;
     /** The end index of the word */
     endIndex: number;
+    /** The extra cost associated with this word */
+    cost: number;
 };

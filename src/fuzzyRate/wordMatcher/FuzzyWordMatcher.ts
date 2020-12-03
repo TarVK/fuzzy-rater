@@ -10,6 +10,8 @@ import {NFADFA} from "../../DFA/NFADFA/NFADFA";
  */
 export class FuzzyWordMatcher {
     protected NFA: NFADFA<IFuzzyNodeData, IFuzzyTransitionData>;
+    public word: string;
+    public maxDistance: number;
 
     /**
      * Constructs a new fuzzy word rater
@@ -17,6 +19,8 @@ export class FuzzyWordMatcher {
      * @param maxDistance The maximum error
      */
     public constructor(word: string, maxDistance: number) {
+        this.word = word;
+        this.maxDistance = maxDistance;
         this.initialize(word, maxDistance);
     }
 

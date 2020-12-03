@@ -16,8 +16,10 @@ function getMatchIndices(matches: IWordOrderMatch[]): number[] {
  * @param inputs The list of inputs
  * @returns The inputs with the addition of the end index
  */
-function addEnds(inputs: {word: string; index: number}[]): IWordOrderMatchInput[] {
-    return inputs.map(n => ({...n, endIndex: n.index + n.word.length}));
+function addEnds(
+    inputs: {word: string; index: number; cost?: number}[]
+): IWordOrderMatchInput[] {
+    return inputs.map(n => ({cost: 0, ...n, endIndex: n.index + n.word.length}));
 }
 
 describe("WordOrderMatcher", () => {
@@ -96,6 +98,26 @@ describe("WordOrderMatcher", () => {
             ]);
             const match = matcher.getMatchData(m2);
             expect(getMatchIndices(match.matches)).toEqual([0, 2]);
+        });
+
+        it("Should prefer a larger distance, if the cost ends up being lower", () => {
+            const m3 = addEnds([
+                {word: "stuff", index: 0},
+                {word: "stuff", index: 10},
+                {word: "cool", index: 18},
+            ]);
+            const m4 = addEnds([
+                {word: "stuff", index: 0},
+                {word: "stuff", index: 10, cost: 20},
+                {word: "cool", index: 18},
+            ]);
+            const matcher = new WordOrderMatcher(["stuff", "cool"], 20); // Penalty > distance
+
+            const match = matcher.getMatchData(m3);
+            expect(getMatchIndices(match.matches)).toEqual([1, 2]);
+
+            const match2 = matcher.getMatchData(m4);
+            expect(getMatchIndices(match2.matches)).toEqual([0, 2]);
         });
     });
 });

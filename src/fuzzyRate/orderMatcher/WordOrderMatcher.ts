@@ -77,22 +77,31 @@ export class WordOrderMatcher {
                     // Consider either the best match for all words so far, or skipping all previous words (similar to "Largest Sum Contiguous Subarray" problem)
 
                     // All words so far
-                    const prevMatch = table[i - 1][j - 1];
-                    const addedDistance = Math.abs(
+                    // Choose whether this match, or a previous match of the same word (with greater distance) is preferable
+                    const prevWord = table[i - 1][j - 1];
+                    const prevWordAddedDistance = Math.abs(
                         match.index -
-                            prevMatch.lastIndex -
+                            prevWord.lastIndex -
                             // Subtract 1, since we expect spaces to be present (this slightly penalizes no spaces being present)
                             1
                     );
-                    const extendedMatch = {
-                        distance: prevMatch.distance + addedDistance,
+                    let extendedMatch = {
+                        distance: prevWord.distance + prevWordAddedDistance + match.cost,
                         skippedWord: false,
                         lastIndex: match.endIndex,
                     };
 
+                    const prevMatch = table[i - 1][j];
+                    if (
+                        // If the extra distance of the new match is greater than the extra lastIndex distance of the previous match, use the previous match
+                        extendedMatch.distance - prevMatch.distance >
+                        extendedMatch.lastIndex - prevMatch.lastIndex
+                    )
+                        extendedMatch = prevMatch;
+
                     // Skipping previous words, since the penalties may be better than the distance from previous words
                     const newMatch = {
-                        distance: table[0][j - 1].distance,
+                        distance: table[0][j - 1].distance + match.cost,
                         skippedWord: true,
                         lastIndex: match.endIndex,
                     };
@@ -167,16 +176,20 @@ export class WordOrderMatcher {
         while (i > 0 && j > 0) {
             let m = table[i][j];
             if (words[j - 1].word == matches[i - 1].word) {
-                res.unshift({
-                    match: matches[i - 1],
-                    matchIndex: i - 1,
-                    wordIndex: j - 1,
-                });
-                if (m.skippedWord) {
-                    break;
-                } else {
+                if (m.lastIndex != matches[i - 1].endIndex) {
                     i -= 1;
-                    j -= 1;
+                } else {
+                    res.unshift({
+                        match: matches[i - 1],
+                        matchIndex: i - 1,
+                        wordIndex: j - 1,
+                    });
+                    if (m.skippedWord) {
+                        break;
+                    } else {
+                        i -= 1;
+                        j -= 1;
+                    }
                 }
             } else {
                 if (m.skippedWord) {
