@@ -4,6 +4,10 @@ import {FuzzyMultiWordMatcher} from "./wordMatcher/FuzzyMultiWordMatcher";
 import {IFuzzyRateConfig} from "./_types/IFuzzyRaterConfig";
 import {IFuzzyWordInput} from "./_types/IFuzzyWordsInput";
 import {IFuzzyMatch} from "./_types/IFuzzyMatch";
+import {IFuzzyWordMatch} from "./wordMatcher/_types/IFuzzyWordMatch";
+import {IQueryWord} from "./_types/IQueryWord";
+import {addAlterationData} from "./addAlterationData";
+import {IMatchGroup} from "./_types/IMatchGroup";
 
 /**
  * The highest level fuzzy rater class, to rate how well text matches an input query
@@ -47,9 +51,7 @@ export class FuzzyRater {
             ...config,
         };
 
-        if (typeof query == "string") {
-            query = query.split(" ").map(word => ({word}));
-        }
+        if (typeof query == "string") query = query.split(" ").map(word => ({word}));
         const fuzziness = Object.entries(normalizedConfig.fuzziness)
             .map(([a, b]) => [Number(a), b])
             .sort(([a], [b]) => a - b);
@@ -183,5 +185,104 @@ export class FuzzyRater {
      */
     public getScore(text: string): number {
         return this.getMatch(text).score;
+    }
+
+    /**
+     * Retrieves the match data that can be used for highlighting
+     * @param text The text to be matched
+     * @returns The scores including match data
+     */
+    public getMatchData(text: string): IFuzzyMatch & {matchGroups: IMatchGroup[]} {
+        const {missingCost, extraBonus, matches, alterations} = this.wordMatchers.reduce(
+            (
+                {missingCost, extraBonus, matches: prevMatches, alterations},
+                {count: requireWordCount, matcher}
+            ) => {
+                // Retrieve the matches for this matcher
+                const matchData = matcher.getMatchData(text);
+                const word = matcher.word;
+                const matches = matchData.alterations.reduce((matches, alteration) => {
+                    if (alteration.query.index == 0) {
+                        const distance = matchData.distances[matches.length];
+                        return [
+                            ...matches,
+                            {
+                                word,
+                                index: alteration.target.index,
+                                endIndex:
+                                    alteration.target.index + word.length - distance,
+                                cost: distance * this.config.typoPenalty,
+                            },
+                        ];
+                    }
+                    return matches;
+                }, [] as IWordOrderMatchInput[]);
+
+                return {
+                    missingCost:
+                        missingCost +
+                        (matchData.distances.length == 0
+                            ? this.config.missingPenalty
+                            : 0),
+                    // Note: It doesn't consider distance or typos in extra matches
+                    extraBonus:
+                        extraBonus +
+                        Math.max(0, matchData.distances.length - requireWordCount) *
+                            this.config.extraBonus,
+                    matches: this.mergeMatches(prevMatches, matches),
+                    alterations: [
+                        ...alterations,
+                        {word, alterations: matchData.alterations},
+                    ],
+                };
+            },
+            {
+                missingCost: 0,
+                extraBonus: 0,
+                alterations: [] as {word: string; alterations: IFuzzyWordMatch[]}[],
+                matches: [] as (IWordOrderMatchInput & {distance: number})[],
+            }
+        );
+
+        if (matches.length > 0) {
+            const orderMatchData = this.orderMatcher.getMatchData(matches);
+            const orderCost = orderMatchData.distance;
+
+            // Combine all alterations data
+            const words = this.query.map(
+                ({word: text}, index): IQueryWord => {
+                    const match = orderMatchData.matches.find(m => m.wordIndex == index);
+                    return {
+                        text,
+                        index,
+                        matchedIndex: match?.match.index ?? -1,
+                    };
+                }
+            );
+            const matchGroups = words.reduce((groups, word) => {
+                const wordAlterations = alterations.find(({word: w}) => w == word.text);
+                if (wordAlterations)
+                    return addAlterationData(groups, wordAlterations.alterations, word);
+                return groups;
+            }, [] as IMatchGroup[]);
+
+            // Return the final result
+            const combinedScore = orderCost + missingCost - extraBonus;
+            return {
+                matchGroups,
+                score: combinedScore,
+                orderCost,
+                missingCost,
+                extraBonus,
+            };
+        }
+
+        return {
+            matchGroups: [],
+            score: Infinity,
+            orderCost: Infinity,
+            missingCost: Infinity,
+            extraBonus: 0,
+        };
     }
 }

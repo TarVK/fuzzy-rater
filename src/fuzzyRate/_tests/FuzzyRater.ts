@@ -56,4 +56,33 @@ describe("FuzzyRater", () => {
             expect(sortResults(shuffled, scores)).toEqual(texts);
         });
     });
+    describe("getMatchData", () => {
+        it("Should retrieve the same score as getScore", () => {
+            const text = "I like something col and something stuff you know";
+            const rater = new FuzzyRater("something cool");
+
+            expect(rater.getScore(text)).toEqual(rater.getMatchData(text).score);
+        });
+        it("Should return the correct match groups", () => {
+            const text = "I like something col and something stuff you know";
+            const rater = new FuzzyRater("something cool");
+
+            const groups = rater.getMatchData(text).matchGroups;
+            const simplifiedGroups = groups.map(group => ({
+                types: group.relations.map(r => r.type),
+                text: group.range.text,
+            }));
+            expect(simplifiedGroups).toEqual([
+                {text: "I like ", types: []},
+                {text: "something", types: ["match"]},
+                {text: " ", types: []},
+                {text: "c", types: ["match"]},
+                {text: "", types: ["skip"]},
+                {text: "ol", types: ["match"]},
+                {text: " and ", types: []},
+                {text: "something", types: ["match"]},
+                {text: " stuff you know", types: []},
+            ]);
+        });
+    });
 });
