@@ -1,5 +1,5 @@
 import {createFuzzyNFATemplate} from "./createFuzzyNFATemplate";
-import {IFuzzyNodeData} from "./_types/IFuzzyNodeData";
+import {IExtendedFuzzyNodeData, IFuzzyNodeData} from "./_types/IFuzzyNodeData";
 import {IFuzzyTransitionData} from "./_types/IFuzzyTransitionData";
 import {IFuzzyWordMatch} from "./_types/IFuzzyWordMatch";
 import {NFADFA} from "../../DFA/NFADFA/NFADFA";
@@ -10,7 +10,11 @@ import {INFADFATrace} from "../../DFA/NFADFA/_types/INFADFATrace";
  * Initial setup time is relatively long, but matching per string happens in linear time.
  */
 export class FuzzyMultiWordMatcher {
-    protected NFA: NFADFA<IFuzzyNodeData, IFuzzyTransitionData, IFuzzyNodeData>;
+    protected NFA: NFADFA<
+        IExtendedFuzzyNodeData,
+        IFuzzyTransitionData,
+        IExtendedFuzzyNodeData
+    >;
     public word: string;
     public maxDistance: number;
 
@@ -37,6 +41,7 @@ export class FuzzyMultiWordMatcher {
             nodeMeta: nodes =>
                 this.getBestMatch(nodes, n => n.metadata)?.metadata || {
                     matched: false,
+                    searchIndex: 0,
                     distance: 0,
                 },
             // No need to augment the transitions
@@ -53,7 +58,7 @@ export class FuzzyMultiWordMatcher {
      */
     protected getBestMatch<M>(
         matches: M[],
-        getNode: (data: M) => IFuzzyNodeData,
+        getNode: (data: M) => IExtendedFuzzyNodeData,
         includeNoneMatch: boolean = false
     ): M | undefined {
         const best = matches.reduce((best, m) => {
@@ -67,7 +72,8 @@ export class FuzzyMultiWordMatcher {
 
         const bestNonMatch = matches.reduce((best, m) => {
             const node = getNode(m);
-            return best == null || node.distance < best.distance
+            return node.searchIndex == 0 &&
+                (best == null || node.distance < best.distance)
                 ? {item: m, distance: node.distance}
                 : best;
         }, undefined as undefined | {item: M; distance: number});

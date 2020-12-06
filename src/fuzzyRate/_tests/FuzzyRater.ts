@@ -38,8 +38,8 @@ describe("FuzzyRater", () => {
             const texts = [
                 "I like something cool and col stuff you know",
                 "I like something cool and stuff you know",
-                "I like something and cool stuff you know",
                 "I like something col and something stuff you know",
+                "I like something and cool stuff you know",
                 "I like something col and stuff you know",
                 "I like cool stuff and something else you know",
                 "I like cool stuff and somethng else you know",
@@ -60,8 +60,17 @@ describe("FuzzyRater", () => {
         it("Should retrieve the same score as getScore", () => {
             const text = "I like something col and something stuff you know";
             const rater = new FuzzyRater("something cool");
-
             expect(rater.getScore(text)).toEqual(rater.getMatchData(text).score);
+
+            const text2 = `with disconsolate eyes. Her husband had been "deranged in his head" for a few years before
+            `;
+            const rater2 = new FuzzyRater("orange");
+            expect(rater2.getScore(text2)).toEqual(rater2.getMatchData(text2).score);
+
+            const text3 =
+                "manner of peasants, grave and slow. But before the sun had set the father had submitted to";
+            const rater3 = new FuzzyRater("oranne");
+            expect(rater3.getScore(text3)).toEqual(rater3.getMatchData(text3).score);
         });
         it("Should return the correct match groups", () => {
             const text = "I like something col and something stuff you know";

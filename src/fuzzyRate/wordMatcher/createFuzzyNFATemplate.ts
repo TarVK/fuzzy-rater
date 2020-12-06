@@ -1,7 +1,7 @@
 import {INormalizedNFANode} from "../../NFA/_types/INormalizedNFANode";
 import {INormalizedNFATemplate} from "../../NFA/_types/INormalizedNFATemplate";
 import {INormalizedNFATransition} from "../../NFA/_types/INormalizedNFATransition";
-import {IFuzzyNodeData} from "./_types/IFuzzyNodeData";
+import {IExtendedFuzzyNodeData} from "./_types/IFuzzyNodeData";
 import {IFuzzyTransitionData} from "./_types/IFuzzyTransitionData";
 
 /**
@@ -15,8 +15,11 @@ export function createFuzzyNFATemplate(
     query: string,
     maxDistance: number,
     exitOnMatch: boolean = false
-): INormalizedNFATemplate<IFuzzyNodeData, IFuzzyTransitionData> {
-    const nodes = [] as INormalizedNFANode<IFuzzyNodeData, IFuzzyTransitionData>[];
+): INormalizedNFATemplate<IExtendedFuzzyNodeData, IFuzzyTransitionData> {
+    const nodes = [] as INormalizedNFANode<
+        IExtendedFuzzyNodeData,
+        IFuzzyTransitionData
+    >[];
 
     // Add the initial node
     nodes.push({
@@ -25,6 +28,7 @@ export function createFuzzyNFATemplate(
         transitions: [...getTransitions(query, maxDistance, 0, -1)],
         metadata: {
             matched: false,
+            searchIndex: 0,
             distance: 0,
         },
     });
@@ -40,6 +44,7 @@ export function createFuzzyNFATemplate(
                 ],
                 metadata: {
                     matched: i + 1 == query.length,
+                    searchIndex: i + 1,
                     distance: dist,
                 },
             });

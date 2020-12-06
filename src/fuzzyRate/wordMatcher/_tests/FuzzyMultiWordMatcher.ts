@@ -121,27 +121,51 @@ describe("FuzzyMultiWordMatcher", () => {
                 {endIndex: 41, distance: 2},
             ]);
         });
+        it("Should obtain the right distances", () => {
+            const matcher = new FuzzyMultiWordMatcher("stragled", 2);
+            const match = matcher.getMatch(
+                "where they sprawled amongst the tough stalks"
+            );
+            const match2 = matcher.getMatch(
+                "wedding guests straggled in pairs and groups"
+            );
+            expect(match.map(({distance}) => distance)).toEqual([2]);
+            expect(match2.map(({distance}) => distance)).toEqual([1]);
+        });
     });
     describe("FuzzyMultiWordMatcher.getMatchData", () => {
         it("Should retrieve the change data", () => {
-            const matcher = new FuzzyMultiWordMatcher("potatlers", 2);
-            const match = matcher.getMatchData(
-                "I like potatoes in germany are freaking potaltles you know?"
-            );
-            expect(match.alterations.map(({type}) => type)).toEqual(
-                createAlterations(
-                    "iiiiiiimmmmmrmsmiiiiiiiiiiiiiiiiiiiiiiiiimmmmammmsmiiiiiiiiii"
-                )
-            );
-            expect(match.distances).toEqual([2, 2]);
+            // const matcher = new FuzzyMultiWordMatcher("potatlers", 2);
+            // const match = matcher.getMatchData(
+            //     "I like potatoes in germany are freaking potaltles you know?"
+            // );
+            // expect(match.alterations.map(({type}) => type)).toEqual(
+            //     createAlterations(
+            //         "iiiiiiimmmmmrmsmiiiiiiiiiiiiiiiiiiiiiiiiimmmmammmsmiiiiiiiiii"
+            //     )
+            // );
+            // expect(match.distances).toEqual([2, 2]);
 
-            const match2 = matcher.getMatchData(
-                "I like potatoes with poetatlers and potatlers"
+            // const match2 = matcher.getMatchData(
+            //     "I like potatoes with poetatlers and potatlers"
+            // );
+            // expect(match2.alterations.map(({type}) => type)).toEqual(
+            //     createAlterations("iiiiiiimmmmmrmsmiiiiiimmammmmmmmiiiiimmmmmmmmm")
+            // );
+            // expect(match2.distances).toEqual([2, 1, 0]);
+
+            const matcher2 = new FuzzyMultiWordMatcher("oranne", 2);
+            const match3 = matcher2.getMatchData("manner");
+            expect(match3.alterations.map(({type}) => type)).toEqual(
+                createAlterations("srmmmmi")
             );
-            expect(match2.alterations.map(({type}) => type)).toEqual(
-                createAlterations("iiiiiiimmmmmrmsmiiiiiimmammmmmmmiiiiimmmmmmmmm")
+        });
+        it("Shouldn't match unfinished words", () => {
+            const matcher = new FuzzyMultiWordMatcher("something", 2);
+            const match = matcher.getMatchData("I like to do so");
+            expect(match.alterations.map(({type}) => type)).toEqual(
+                createAlterations("iiiiiiiiiiiiiii")
             );
-            expect(match2.distances).toEqual([2, 1, 0]);
         });
     });
 });

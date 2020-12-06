@@ -1,5 +1,5 @@
 {
-    "name": "fuzzy-rate",
+    "name": "fuzzy-rater",
     "version": "0.0.0",
     "description": "Tooling for fuzzily rating text according to some query",
     "types": "build/index.d.ts",

@@ -43,15 +43,19 @@ export class FuzzyRater {
         config?: IFuzzyRateConfig
     ): {query: Required<IFuzzyWordInput>[]; config: Required<IFuzzyRateConfig>} {
         const normalizedConfig = {
-            fuzziness: {2: 1, 5: 2},
-            skipPenalty: 10,
-            missingPenalty: 10,
-            typoPenalty: 10,
+            fuzziness: {3: 1, 5: 2},
+            skipPenalty: 50,
+            missingPenalty: 100,
+            typoPenalty: 5,
             extraBonus: 5,
             ...config,
         };
 
-        if (typeof query == "string") query = query.split(" ").map(word => ({word}));
+        if (typeof query == "string")
+            query = query
+                .trim()
+                .split(" ")
+                .map(word => ({word}));
         const fuzziness = Object.entries(normalizedConfig.fuzziness)
             .map(([a, b]) => [Number(a), b])
             .sort(([a], [b]) => a - b);
@@ -202,7 +206,7 @@ export class FuzzyRater {
                 const matchData = matcher.getMatchData(text);
                 const word = matcher.word;
                 const matches = matchData.alterations.reduce((matches, alteration) => {
-                    if (alteration.query.index == 0) {
+                    if (alteration.query.index == 0 && alteration.type != "ignore") {
                         const distance = matchData.distances[matches.length];
                         return [
                             ...matches,

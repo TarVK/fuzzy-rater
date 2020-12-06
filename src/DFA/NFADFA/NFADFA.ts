@@ -9,6 +9,7 @@ import {convertNFATemplateToDFATemplate} from "./convertNFATemplateToDFATemplate
 import {INormalizedNFANode} from "../../NFA/_types/INormalizedNFANode";
 import {INFADFATrace} from "./_types/INFADFATrace";
 import {INFADFAMetaGetters} from "./_types/INFADFAMetaGetters";
+import {INormalizedNFATransition} from "../../NFA/_types/INormalizedNFATransition";
 
 /**
  * A deterministic finite automata that emulates a non-deterministic finite automata.
@@ -18,6 +19,7 @@ import {INFADFAMetaGetters} from "./_types/INFADFAMetaGetters";
 export class NFADFA<N, T, CN = unknown, CT = unknown> {
     public DFA: DFA<INFADFANodeData<N, T, CN>, INFADFATransitionData<T, CT>>;
     protected nodes: Record<string, INormalizedNFANode<N, T>>;
+    protected initNode: string;
 
     /**
      * Creates a DFA equivalent to a given NFA template
@@ -44,6 +46,7 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
             template,
             getMeta as INFADFAMetaGetters<N, T, CN, CT>
         );
+        this.initNode = dfaTemplate.initial;
         this.nodes = Object.fromEntries(template.map(v => [v.ID, v]));
         this.DFA = new DFA(dfaTemplate);
     }
@@ -94,8 +97,7 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
             ) => {
                 const chooseTransition = getTransitionChooser(result);
 
-                // If a best match was found
-                const trace = result.path.reduceRight(
+                const data = result.path.reduceRight(
                     ({last, trace}, item, i) => {
                         if (!last) return {};
 
@@ -139,9 +141,45 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
                         };
                     },
                     {trace: [] as {fromNode: N; transition: T}[], last: s}
-                )?.trace;
+                );
 
-                if (trace) {
+                if (data.trace) {
+                    const trace = data.trace;
+
+                    // We might have finished at one of the nodes reachable in 0 steps from the initial node, instead of the initial node itself
+                    const last = data.last;
+                    if (!last.initial) {
+                        const transitions = ([] as IAugmentedNFATransition<T>[]).concat(
+                            ...result.path[0].fromNode.sources.map(source =>
+                                source.transitions.map(transition => ({
+                                    ...transition,
+                                    from: source.ID,
+                                }))
+                            )
+                        );
+                        const sourceTransition = chooseTransition(
+                            last,
+                            transitions,
+                            -1,
+                            this.nodes
+                        );
+
+                        // Follow any empty transitions until a character transition was used
+                        const transitionData: {fromNode: N; transition: T}[] = [];
+                        let initTransition = sourceTransition;
+                        while (initTransition?.type == "empty") {
+                            transitionData.unshift({
+                                fromNode: this.nodes[initTransition.from].metadata,
+                                transition: initTransition.metadata,
+                            });
+                            initTransition = transitions.find(
+                                transition => transition.to == initTransition?.from
+                            );
+                        }
+
+                        trace.unshift(...transitionData);
+                    }
+
                     // Map the transition metadata to the correct format
                     return trace;
                 } else {
