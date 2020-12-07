@@ -1,6 +1,6 @@
 {
     "name": "fuzzy-rater",
-    "version": "0.0.0",
+    "version": "0.0.0-alpha.0",
     "description": "Tooling for fuzzily rating text according to some query",
     "types": "build/index.d.ts",
     "main": "build/index.js",
@@ -29,7 +29,7 @@
         "url": "https://github.com/TarVK/fuzzy-rate/issues"
     },
     "homepage": "https://github.com/TarVK/fuzzy-rate#readme",
-    "dependencies": {
+    "devDependencies": {
         "@types/jest": "^26.0.15",
         "@types/node": "^14.14.10",
         "jest": "^26.6.3",

@@ -1,14 +1,14 @@
 import React, {FC} from "react";
-import {RaterScoreTestSkeleton} from "./RaterScoreTestSkeleton";
+import {RaterTestSkeleton} from "./RaterTestSkeleton";
 import ReactJson from "react-json-view";
 
 export const RaterMatchDataTest: FC = () => (
-    <RaterScoreTestSkeleton
+    <RaterTestSkeleton
         title="Rater match data"
         description={
             <>
                 A simple test to compute the score as well as extended match data usable
-                for highlighting{" "}
+                for highlighting.
             </>
         }
         init={{

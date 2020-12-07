@@ -1,10 +1,18 @@
 import React, {FC} from "react";
+import {TestsSection} from "./TestsSection";
 import {RaterScoreFailureTest} from "./tests/rater/RaterScoreFailureTest";
 import {RaterScoreLinearTest} from "./tests/rater/RaterScoreLinearTest";
 import {RaterScoreSuccessTest} from "./tests/rater/RaterScoreSuccessTest";
 import {RaterMatchDataTest} from "./tests/rater/RaterMatchDataTest";
 import {RaterMatchDataLinearTest} from "./tests/rater/RaterMatchDataLinearTest";
-import {TestsSection} from "./TestsSection";
+import {MatcherScoreSuccessTest} from "./tests/wordMatcher/MatcherScoreSuccessTest";
+import {MatcherScoreFailureTest} from "./tests/wordMatcher/MatcherScoreFailureTest";
+import {MatcherMatchDataTest} from "./tests/wordMatcher/MatcherMatchDataTest";
+import {MultiMatcherScoreSuccessTest} from "./tests/multiWordMatcher/MultiMatcherScoreSuccessTest";
+import {MultiMatcherScoreFailureTest} from "./tests/multiWordMatcher/MultiMatcherScoreFailureTest";
+import {MultiMatcherMatchDataTest} from "./tests/multiWordMatcher/MultiMatcherMatchDataTest";
+import {MultiMatcherScoreLinearTest} from "./tests/multiWordMatcher/MultiMatcherScoreLinearTest";
+import {MultiMatcherMatchDataLinearTest} from "./tests/multiWordMatcher/MultiMatcherMatchDataLinearTest";
 
 /**
  * A bunch of performance tests for the system
@@ -27,6 +35,39 @@ export const Tests: FC = () => (
             <RaterScoreLinearTest />
             <RaterMatchDataTest />
             <RaterMatchDataLinearTest />
+        </TestsSection>
+        <TestsSection
+            title="Word matcher"
+            description={
+                <>
+                    The word matcher class to find whether the given text contains the
+                    word, and with how many typos. This doesn't check whether multiple
+                    occurrences exist, it only tries to find the best one. <br />{" "}
+                    Construction (/compilation) time of the rater increases exponentially
+                    with max similarity distance and word length. <br /> Execution time
+                    only increases linearly with character count.
+                </>
+            }>
+            <MatcherScoreSuccessTest />
+            <MatcherScoreFailureTest />
+            <MatcherMatchDataTest />
+        </TestsSection>
+        <TestsSection
+            title="Multi word matcher"
+            description={
+                <>
+                    The word matcher class to find whether the given text contains the
+                    word, how often it does, and with how many typos. <br /> Construction
+                    (/compilation) time of the rater increases exponentially with max
+                    similarity distance and word length. <br /> Execution time only
+                    increases linearly with character count.
+                </>
+            }>
+            <MultiMatcherScoreSuccessTest />
+            <MultiMatcherScoreFailureTest />
+            <MultiMatcherScoreLinearTest />
+            <MultiMatcherMatchDataTest />
+            <MultiMatcherMatchDataLinearTest />
         </TestsSection>
     </>
 );

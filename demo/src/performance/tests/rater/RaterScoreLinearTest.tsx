@@ -1,8 +1,8 @@
 import React, {FC} from "react";
-import {RaterScoreTestSkeleton} from "./RaterScoreTestSkeleton";
+import {RaterTestSkeleton} from "./RaterTestSkeleton";
 
 export const RaterScoreLinearTest: FC = () => (
-    <RaterScoreTestSkeleton
+    <RaterTestSkeleton
         title="Rater linear time score"
         description={
             <>

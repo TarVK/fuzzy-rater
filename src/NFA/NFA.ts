@@ -2,8 +2,8 @@ import {INormalizedNFANode} from "./_types/INormalizedNFANode";
 import {INormalizedNFATemplate} from "./_types/INormalizedNFATemplate";
 import {INormalizedNFATransition} from "./_types/INormalizedNFATransition";
 import {INFATrace} from "./_types/INFATrace";
+import {remainingCode} from "../DFA";
 
-export const remainingCode = "re";
 export const emptyCode = "et";
 
 /**

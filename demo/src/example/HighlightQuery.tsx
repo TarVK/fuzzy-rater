@@ -8,7 +8,7 @@ const errorColor = new Color("#F55");
 /**
  * A component to highlight text with
  */
-export const HighlightText: FC<{
+export const HighlightQuery: FC<{
     rater: FuzzyRater;
     children: string;
     getColor: (index: number) => string;

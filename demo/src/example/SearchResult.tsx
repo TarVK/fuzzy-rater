@@ -1,7 +1,7 @@
 import React, {FC, useCallback, useState} from "react";
 import {getTheme, IconButton, Stack, StackItem, TextField} from "@fluentui/react";
 import {FuzzyRater} from "fuzzy-rater";
-import {HighlightText} from "./HighlightText";
+import {HighlightQuery} from "./HighlightQuery";
 
 const theme = getTheme();
 /**
@@ -46,9 +46,9 @@ export const SearchResult: FC<{
                     {editing ? (
                         <TextField value={editText} onChange={onTextChange} />
                     ) : rater ? (
-                        <HighlightText rater={rater} getColor={getColor}>
+                        <HighlightQuery rater={rater} getColor={getColor}>
                             {children}
-                        </HighlightText>
+                        </HighlightQuery>
                     ) : (
                         children
                     )}

@@ -1,7 +1,7 @@
 import {Label} from "@fluentui/react";
 import {FuzzyRater} from "fuzzy-rater";
 import React, {FC, ReactNode, useCallback, useState} from "react";
-import {HighlightText} from "../../../example/HighlightText";
+import {HighlightQuery} from "../../../example/HighlightQuery";
 import {SearchTestSkeleton} from "../../SearchTestSkeleton";
 import {FuzzinessInput} from "./FuzzinessInput";
 import {getColor} from "../../../example/SearchDemo";
@@ -9,7 +9,7 @@ import {getColor} from "../../../example/SearchDemo";
 /**
  * A skeleton that can be used to make generic rater tests
  */
-export const RaterScoreTestSkeleton: FC<{
+export const RaterTestSkeleton: FC<{
     title: string;
     description: ReactNode;
     results: {compile: number; execute: number; count: number; charCount: number};
@@ -43,9 +43,9 @@ export const RaterScoreTestSkeleton: FC<{
                     {(!hideMatch || getExtraResult) && <Label>Match</Label>}
                     {!hideMatch && (
                         <>
-                            <HighlightText rater={rater} getColor={getColor}>
+                            <HighlightQuery rater={rater} getColor={getColor}>
                                 {target}
-                            </HighlightText>
+                            </HighlightQuery>
                             <br />
                         </>
                     )}

@@ -1,10 +1,10 @@
 import React, {FC} from "react";
-import {RaterTestSkeleton} from "./RaterTestSkeleton";
 import ReactJson from "react-json-view";
+import {MultiWordMatcherTestSkeleton} from "./MultiWordMatcherTestSkeleton";
 
-export const RaterMatchDataLinearTest: FC = () => (
-    <RaterTestSkeleton
-        title="Rater linear time match data"
+export const MultiMatcherMatchDataLinearTest: FC = () => (
+    <MultiWordMatcherTestSkeleton
+        title="Multi word matcher match data"
         description={
             <>
                 A simple test to compute the score as well as extended match data usable
@@ -14,36 +14,28 @@ export const RaterMatchDataLinearTest: FC = () => (
             </>
         }
         init={{
-            search: "rotten black tomatoes",
-            target: "I like to eat a bunch of rotten black tomatoes at once, but rotten black apples aren't as good.".repeat(
+            search: "rotten",
+            target: "I like to eat a bunch of rottkn black tomatoes at once, but rotten black apples aren't as good.".repeat(
                 1e2
             ),
             count: 1e3,
-            fuzziness: {0: 0, 3: 1, 5: 2},
+            maxDistance: 2,
         }}
         results={{
-            compile: 30,
-            execute: 26472,
-            count: 1e5,
-            charCount: 95,
+            compile: 7,
+            execute: 8191,
+            count: 1e3,
+            charCount: 95 * 1e2,
         }}
-        hideMatch
         getAction={(rater, text) => () => rater.getMatchData(text)}
+        hideMatch
         getResult={(rater, text) => {
-            const data = rater.getMatchData(text);
-
+            const result = rater.getMatchData(text);
             return (
                 <>
-                    Score: {data.score} (Order + Missing - Bonus) <br />
-                    Order: {data.orderCost}
-                    <br />
-                    Missing: {data.missingCost}
-                    <br />
-                    Bonus: {data.extraBonus}
-                    <br />
-                    Match groups:{" "}
+                    Distances:
                     <ReactJson
-                        src={data.matchGroups}
+                        src={result.distances}
                         collapsed
                         theme="grayscale:inverted"
                         displayDataTypes={false}
