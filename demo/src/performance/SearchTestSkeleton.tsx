@@ -151,6 +151,7 @@ export const SearchTestSkeleton: FC<{
                     label="Target text"
                     value={target}
                     multiline
+                    styles={{field: {resize: "vertical"}}}
                     onChange={(e, v) => v && setTarget(v)}
                 />
                 <SpinButton

@@ -9,7 +9,7 @@ import {convertNFATemplateToDFATemplate} from "./convertNFATemplateToDFATemplate
 import {INormalizedNFANode} from "../../NFA/_types/INormalizedNFANode";
 import {INFADFATrace} from "./_types/INFADFATrace";
 import {INFADFAMetaGetters} from "./_types/INFADFAMetaGetters";
-import {INormalizedNFATransition} from "../../NFA/_types/INormalizedNFATransition";
+import {merge} from "../../utils/merge";
 
 /**
  * A deterministic finite automata that emulates a non-deterministic finite automata.
@@ -113,7 +113,7 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
                         const transitionData: {fromNode: N; transition: T}[] = [];
                         let initTransition = sourceTransition;
                         while (initTransition?.type == "empty") {
-                            transitionData.unshift({
+                            transitionData.push({
                                 fromNode: this.nodes[initTransition.from].metadata,
                                 transition: initTransition.metadata,
                             });
@@ -128,7 +128,7 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
                             null
                         );
                         if (source && initTransition)
-                            transitionData.unshift({
+                            transitionData.push({
                                 fromNode: source.metadata,
                                 transition: initTransition.metadata,
                             });
@@ -136,7 +136,7 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
                         // Store the proper data of the transition, and store the previous node
                         if (!source) return {};
                         return {
-                            trace: [...transitionData, ...trace],
+                            trace: merge(trace, transitionData),
                             last: source,
                         };
                     },
@@ -168,7 +168,7 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
                         const transitionData: {fromNode: N; transition: T}[] = [];
                         let initTransition = sourceTransition;
                         while (initTransition?.type == "empty") {
-                            transitionData.unshift({
+                            transitionData.push({
                                 fromNode: this.nodes[initTransition.from].metadata,
                                 transition: initTransition.metadata,
                             });
@@ -177,11 +177,11 @@ export class NFADFA<N, T, CN = unknown, CT = unknown> {
                             );
                         }
 
-                        trace.unshift(...transitionData);
+                        trace.push(...transitionData);
                     }
 
                     // Map the transition metadata to the correct format
-                    return trace;
+                    return trace.reverse();
                 } else {
                     // I don't think this can occur, but I'm not positive, so this is a safe-ish failure case
                     console.error("Didn't manage to find a path", input, s);

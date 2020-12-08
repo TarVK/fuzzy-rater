@@ -4,7 +4,7 @@ import {MultiWordMatcherTestSkeleton} from "./MultiWordMatcherTestSkeleton";
 
 export const MultiMatcherScoreLinearTest: FC = () => (
     <MultiWordMatcherTestSkeleton
-        title="Multi linear time score"
+        title="Multi word matcher linear time score"
         description={
             <>
                 The same test as before where we find a proper match, but now fewer times

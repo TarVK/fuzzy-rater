@@ -4,7 +4,7 @@ import {MultiWordMatcherTestSkeleton} from "./MultiWordMatcherTestSkeleton";
 
 export const MultiMatcherMatchDataLinearTest: FC = () => (
     <MultiWordMatcherTestSkeleton
-        title="Multi word matcher match data"
+        title="Multi word matcher linear time match data"
         description={
             <>
                 A simple test to compute the score as well as extended match data usable
@@ -16,14 +16,14 @@ export const MultiMatcherMatchDataLinearTest: FC = () => (
         init={{
             search: "rotten",
             target: "I like to eat a bunch of rottkn black tomatoes at once, but rotten black apples aren't as good.".repeat(
-                1e2
+                1e3
             ),
-            count: 1e3,
+            count: 1e2,
             maxDistance: 2,
         }}
         results={{
             compile: 7,
-            execute: 8191,
+            execute: 4227,
             count: 1e3,
             charCount: 95 * 1e2,
         }}

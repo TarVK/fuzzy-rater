@@ -4,6 +4,7 @@ import {IFuzzyTransitionData} from "./_types/IFuzzyTransitionData";
 import {IFuzzyWordMatch} from "./_types/IFuzzyWordMatch";
 import {NFADFA} from "../../DFA/NFADFA/NFADFA";
 import {INFADFATrace} from "../../DFA/NFADFA/_types/INFADFATrace";
+import {add} from "../../utils/merge";
 
 /**
  * A fuzzy word matcher that can be used to find a word in a number of items.
@@ -100,7 +101,7 @@ export class FuzzyMultiWordMatcher {
                 if (!matched) {
                     return {
                         matches: bestConsecutiveMatch
-                            ? [bestConsecutiveMatch, ...matches]
+                            ? add(matches, bestConsecutiveMatch) // Would preferably add to the start, but that has a higher time complexity
                             : matches,
                         bestConsecutiveMatch: null,
                     };
@@ -125,9 +126,10 @@ export class FuzzyMultiWordMatcher {
         );
 
         // Return the matches
-        return matchData.bestConsecutiveMatch
-            ? [matchData.bestConsecutiveMatch, ...matchData.matches]
+        const res = matchData.bestConsecutiveMatch
+            ? add(matchData.matches, matchData.bestConsecutiveMatch)
             : matchData.matches;
+        return res.reverse(); // Reverse al matches at the end
     }
 
     /**
@@ -147,26 +149,30 @@ export class FuzzyMultiWordMatcher {
             // Obtain the indices of transitions where to choose the best
             const matchIndices = dfaTrace.path
                 .reduceRight(
-                    ({matches, bestConsecutive}, {fromNode}, index) => {
-                        if (fromNode.matched) {
+                    (
+                        {indices, bestConsecutive},
+                        {fromNode: {matched, distance}},
+                        index
+                    ) => {
+                        if (matched) {
                             return {
-                                matches,
+                                indices,
                                 bestConsecutive:
                                     !bestConsecutive ||
-                                    bestConsecutive.distance > fromNode.distance
-                                        ? {index: index - 1, distance: fromNode.distance}
+                                    bestConsecutive.distance > distance
+                                        ? {index: index - 1, distance}
                                         : bestConsecutive,
                             };
                         }
                         return {
-                            matches: bestConsecutive
-                                ? [bestConsecutive, ...matches]
-                                : matches,
+                            indices: bestConsecutive
+                                ? add(indices, bestConsecutive.index)
+                                : indices,
                             bestConsecutive: null,
                         };
                     },
                     {
-                        matches: [] as {index: number; distance: number}[],
+                        indices: [] as number[],
                         bestConsecutive: dfaTrace.final.matched
                             ? {
                                   index: dfaTrace.path.length - 1,
@@ -175,7 +181,8 @@ export class FuzzyMultiWordMatcher {
                             : (null as null | {index: number; distance: number}),
                     }
                 )
-                .matches.map(({index}) => index);
+                .indices.reverse();
+            let nextMatchIndex = matchIndices.pop(); // Actually the previous match, but were iterating backwards
 
             // Return a function that chooses the transition from (/to since moving backwards) a node with the lowest distance, if we found that this leads to the best match
             return (to, transitions, index, nodes) => {
@@ -184,9 +191,9 @@ export class FuzzyMultiWordMatcher {
                 );
 
                 // Look for the best transition that came from a match, and choose that if it exists
-                const matching =
-                    matchIndices.includes(index) &&
-                    possibleTrans.reduce(
+                if (nextMatchIndex == index) {
+                    nextMatchIndex = matchIndices.pop();
+                    const matching = possibleTrans.reduce(
                         (best, transition) => {
                             const md = nodes[transition.from]?.metadata;
                             if (md.matched && md.distance < best.distance)
@@ -195,7 +202,8 @@ export class FuzzyMultiWordMatcher {
                         },
                         {transition: null, distance: Infinity}
                     ).transition;
-                if (matching) return matching;
+                    if (matching) return matching;
+                }
 
                 return possibleTrans[0];
             };
@@ -225,7 +233,7 @@ export class FuzzyMultiWordMatcher {
                         return {
                             alterations,
                             index,
-                            distances: [...distances, fromNode.distance],
+                            distances: add(distances, fromNode.distance),
                             prevNode,
                         };
 
@@ -243,13 +251,14 @@ export class FuzzyMultiWordMatcher {
                     const matched = fromNode.matched;
                     const newMatch = prevNode?.matched && !matched; // Make sure we don't include different distances of the same match
                     return {
-                        alterations: [
-                            ...alterations,
-                            {target, query, type: transition.type},
-                        ],
+                        alterations: add(alterations, {
+                            target,
+                            query,
+                            type: transition.type,
+                        }),
                         distances:
                             newMatch && prevNode
-                                ? [...distances, prevNode.distance]
+                                ? add(distances, prevNode.distance)
                                 : distances,
                         index: transition.type == "skip" ? index : index + 1,
                         prevNode: fromNode,
@@ -257,7 +266,7 @@ export class FuzzyMultiWordMatcher {
                 },
                 {
                     alterations: [] as IFuzzyWordMatch[],
-                    distances: [],
+                    distances: [] as number[],
                     index: 0,
                     prevNode: null as null | IFuzzyNodeData,
                 }
@@ -266,7 +275,7 @@ export class FuzzyMultiWordMatcher {
             return {
                 alterations: result.alterations,
                 distances: best.final.matched
-                    ? [...result.distances, best.final.distance]
+                    ? add(result.distances, best.final.distance)
                     : result.distances,
             };
         }

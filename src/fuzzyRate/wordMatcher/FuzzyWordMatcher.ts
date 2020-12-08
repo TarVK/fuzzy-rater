@@ -3,6 +3,7 @@ import {IFuzzyNodeData} from "./_types/IFuzzyNodeData";
 import {IFuzzyTransitionData} from "./_types/IFuzzyTransitionData";
 import {IFuzzyWordMatch} from "./_types/IFuzzyWordMatch";
 import {NFADFA} from "../../DFA/NFADFA/NFADFA";
+import {add} from "../../utils/merge";
 
 /**
  * A fuzzy word matcher that can be used to find a word in a number of items.
@@ -93,10 +94,11 @@ export class FuzzyWordMatcher {
                         character: transition.character ?? "",
                     };
                     return {
-                        alterations: [
-                            ...alterations,
-                            {target, query, type: transition.type},
-                        ] as IFuzzyWordMatch[], // Doesn't contain 'restart' transition types
+                        alterations: add(alterations, {
+                            target,
+                            query,
+                            type: transition.type,
+                        }) as IFuzzyWordMatch[], // Doesn't contain 'restart' transition types
                         index: transition.type == "skip" ? index : index + 1,
                     };
                 },

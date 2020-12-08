@@ -20,7 +20,7 @@ export const MultiMatcherMatchDataTest: FC = () => (
         }}
         results={{
             compile: 7,
-            execute: 8191,
+            execute: 4269,
             count: 1e5,
             charCount: 95,
         }}

@@ -135,24 +135,24 @@ describe("FuzzyMultiWordMatcher", () => {
     });
     describe("FuzzyMultiWordMatcher.getMatchData", () => {
         it("Should retrieve the change data", () => {
-            // const matcher = new FuzzyMultiWordMatcher("potatlers", 2);
-            // const match = matcher.getMatchData(
-            //     "I like potatoes in germany are freaking potaltles you know?"
-            // );
-            // expect(match.alterations.map(({type}) => type)).toEqual(
-            //     createAlterations(
-            //         "iiiiiiimmmmmrmsmiiiiiiiiiiiiiiiiiiiiiiiiimmmmammmsmiiiiiiiiii"
-            //     )
-            // );
-            // expect(match.distances).toEqual([2, 2]);
+            const matcher = new FuzzyMultiWordMatcher("potatlers", 2);
+            const match = matcher.getMatchData(
+                "I like potatoes in germany are freaking potaltles you know?"
+            );
+            expect(match.alterations.map(({type}) => type)).toEqual(
+                createAlterations(
+                    "iiiiiiimmmmmrmsmiiiiiiiiiiiiiiiiiiiiiiiiimmmmammmsmiiiiiiiiii"
+                )
+            );
+            expect(match.distances).toEqual([2, 2]);
 
-            // const match2 = matcher.getMatchData(
-            //     "I like potatoes with poetatlers and potatlers"
-            // );
-            // expect(match2.alterations.map(({type}) => type)).toEqual(
-            //     createAlterations("iiiiiiimmmmmrmsmiiiiiimmammmmmmmiiiiimmmmmmmmm")
-            // );
-            // expect(match2.distances).toEqual([2, 1, 0]);
+            const match2 = matcher.getMatchData(
+                "I like potatoes with poetatlers and potatlers"
+            );
+            expect(match2.alterations.map(({type}) => type)).toEqual(
+                createAlterations("iiiiiiimmmmmrmsmiiiiiimmammmmmmmiiiiimmmmmmmmm")
+            );
+            expect(match2.distances).toEqual([2, 1, 0]);
 
             const matcher2 = new FuzzyMultiWordMatcher("oranne", 2);
             const match3 = matcher2.getMatchData("manner");
