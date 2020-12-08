@@ -11,11 +11,29 @@ Each of the classes (except for WordOrderMatcher) have a relatively large constr
 Once the class has been constructed, the search text and fuzziness is irrelevant for efficiency.
 Getting the score or match data can be done in linear time relative to the text that searched in.
 
-The library takes inspiration from: http://blog.notdot.net/2010/07/Damn-Cool-Algorithms-Levenshtein-Automata
-A more detailed explanation can be found in the [system](#system) section.
+The library takes inspiration from: http://blog.notdot.net/2010/07/Damn-Cool-Algorithms-Levenshtein-Automata.
+A "more detailed" explanation can be found in the [system](#system) section.
 
-A live demo as well as benchmarks can be seen here [tarvk.github.io/fuzzy-rater](https://tarvk.github.io/fuzzy-rater/demo/build/).
+A live demo as well as benchmarks can be viewed at [tarvk.github.io/fuzzy-rater](https://tarvk.github.io/fuzzy-rater/demo/build/).
 The code for the site isn't great, but it may still be useful in order to see how one could use this library for things like result highlighting.
+
+## Installation and usage
+
+The module can be installed using npm:
+
+```
+npm install fuzzy-rater
+```
+
+After which you can perform basic usage such as:
+
+```ts
+import {FuzzyRater} from "fuzzy-rater";
+const rater = new FuzzyRater("someting");
+const score = rater.getScore("I like something cool");
+```
+
+For more advanced usage, the demo can be checked as well as the provided interfaces below.
 
 ## Components
 
