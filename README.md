@@ -407,9 +407,7 @@ It does this based on the `skipPenalty` and the distance between words. It attem
 
 ### Fuzzy matching
 
-The most important and useful aspect of this library is the `FuzzyMultiWordMatcher` class. This class is able to find occurrences in linear time to the text that's searched in, totally regardless of search input size and fuzziness. The search input size and fuzziness will however affect the initial construction time.
-
-o it's most useful when a lot of possible data has to be queried through to find potential matches, since then the search time will overshadow the construction time.
+The most important and useful aspect of this library is the `FuzzyMultiWordMatcher` class. This class is able to find occurrences in linear time to the text that's searched in, totally regardless of search input size and fuzziness. The search input size and fuzziness will however affect the initial construction time. So it's most useful when a lot of possible data has to be queried through to find potential matches, since then the search time will overshadow the construction time.
 
 This class is based on the idea discussed here: http://blog.notdot.net/2010/07/Damn-Cool-Algorithms-Levenshtein-Automata
 
