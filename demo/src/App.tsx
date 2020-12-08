@@ -52,8 +52,9 @@ export const App: FC = ({}) => {
                         </h1>
                         Fuzzy-rater is a library that contains extensible components that
                         can be used to construct a fuzzy search system. It's not meant as
-                        a plug and play library like most are, but instead as a foundation
-                        to build your own customized search on top of.
+                        a plug and play library like most search libraries are, but
+                        instead as a foundation to build your own customized search on top
+                        of.
                         <h1 style={theme.fonts.xxLargePlus as any} id="demo">
                             Demo
                         </h1>
@@ -125,6 +126,77 @@ const menu: INavLinkGroup[] = [
                                 key: "linearTimeData",
                                 name: "Linear time match data",
                                 url: "#RaterLinearTimeMatchData",
+                            },
+                        ],
+                    },
+                    {
+                        name: "Word matcher",
+                        url: "#WordMatcher",
+                        key: "WordMatcher",
+                        links: [
+                            {
+                                key: "matcherMatchesScore",
+                                name: "Matches score",
+                                url: "#WordMatcherMatchesScore",
+                            },
+                            {
+                                key: "matcherNoMatchesScore",
+                                name: "No matches score",
+                                url: "#WordMatcherNoMatchesScore",
+                            },
+                            {
+                                key: "matcherMatchData",
+                                name: "Match data",
+                                url: "#WordMatcherMatchData",
+                            },
+                        ],
+                    },
+                    {
+                        name: "Multi word matcher",
+                        url: "#MultiWordMatcher",
+                        key: "MultiWordMatcher",
+                        links: [
+                            {
+                                key: "multiMatcherMatchesScore",
+                                name: "Matches score",
+                                url: "#MultiWordMatcherMatchesScore",
+                            },
+                            {
+                                key: "multiMatcherNoMatchesScore",
+                                name: "No matches score",
+                                url: "#MultiWordMatcherNoMatchesScore",
+                            },
+                            {
+                                key: "matcherLinearTime",
+                                name: "Linear time score",
+                                url: "#MultiWordMatcherLinearTimeScore",
+                            },
+                            {
+                                key: "multiMatcherMatchData",
+                                name: "Match data",
+                                url: "#MultiWordMatcherMatchData",
+                            },
+                            {
+                                key: "matcherLinearTimeData",
+                                name: "Linear time match data",
+                                url: "#MultiWordMatcherLinearTimeMatchData",
+                            },
+                        ],
+                    },
+                    {
+                        name: "Word order matcher",
+                        url: "#WordOrderMatcher",
+                        key: "WordOrderMatcher",
+                        links: [
+                            {
+                                key: "wordOrderMatchesScore",
+                                name: "Matches score",
+                                url: "#OrderMatcherMatchesScore",
+                            },
+                            {
+                                key: "wordOrderMatchData",
+                                name: "Match data",
+                                url: "#OrderMatcherMatchData",
                             },
                         ],
                     },

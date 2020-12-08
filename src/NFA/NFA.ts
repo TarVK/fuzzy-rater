@@ -165,11 +165,10 @@ export class NFA<N, T> {
                 if (charTrans) trans = charTrans;
                 else trans = transitions[remainingCode] || [];
                 trans.forEach(({state, metadata}) => {
-                    if (!newState.find(({node}) => node == state))
-                        newState.push({
-                            node: state,
-                            path: [...path, {node, transition: metadata}],
-                        });
+                    newState.push({
+                        node: state,
+                        path: [...path, {node, transition: metadata}],
+                    });
                 });
             });
 

@@ -11,8 +11,10 @@ const errorColor = new Color("#F55");
 export const HighlightQuery: FC<{
     rater: FuzzyRater;
     children: string;
+    /** Whether to only highlight if part of the best selection */
+    onlyBest?: boolean;
     getColor: (index: number) => string;
-}> = ({rater, children, getColor}) => {
+}> = ({rater, children, getColor, onlyBest}) => {
     const [words, setWords] = useState([children] as (string | JSX.Element)[]);
 
     useEffect(() => {
@@ -24,6 +26,7 @@ export const HighlightQuery: FC<{
             // Add the highlight color to each group
             const higlighted = groups.map((group, i) => {
                 return group.relations.reduce((combined, relation) => {
+                    if (onlyBest && !relation.partOfBestOrder) return combined;
                     const baseColor = getColor(relation.word.index);
                     const exactColor =
                         relation.type == "match"

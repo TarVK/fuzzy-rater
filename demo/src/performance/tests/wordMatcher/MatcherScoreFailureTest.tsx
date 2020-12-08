@@ -10,6 +10,9 @@ export const MatcherScoreFailureTest: FC = () => (
                 shouldn't affect performance.
             </>
         }
+        code={
+            "const matcher = new FuzzyWordMatcher(word, distance); // Compilation\nconst result = matcher.getMatch(text); // Execution"
+        }
         init={{
             search: "rotten",
             target:
@@ -20,8 +23,6 @@ export const MatcherScoreFailureTest: FC = () => (
         results={{
             compile: 19,
             execute: 309,
-            count: 1e5,
-            charCount: 95,
         }}
         getAction={(rater, text) => () => rater.getMatch(text)}
         getResult={(rater, text) => {

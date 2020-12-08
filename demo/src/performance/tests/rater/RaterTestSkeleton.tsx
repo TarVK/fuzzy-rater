@@ -7,12 +7,13 @@ import {FuzzinessInput} from "./FuzzinessInput";
 import {getColor} from "../../../example/SearchDemo";
 
 /**
- * A skeleton that can be used to make generic rater tests
+ * A generic skeleton that can be used to make rater tests
  */
 export const RaterTestSkeleton: FC<{
     title: string;
     description: ReactNode;
-    results: {compile: number; execute: number; count: number; charCount: number};
+    code: string;
+    results: {compile: number; execute: number};
     init: {
         search: string;
         target: string;
@@ -25,6 +26,7 @@ export const RaterTestSkeleton: FC<{
 }> = ({
     title,
     description,
+    code,
     init,
     results,
     getAction,
@@ -33,7 +35,17 @@ export const RaterTestSkeleton: FC<{
 }) => {
     const [fuzziness, setFuzziness] = useState(init.fuzziness);
     const getResult = useCallback(
-        ({target, search, formattedTimes, ourResult}) => {
+        ({
+            target,
+            search,
+            formattedTimes,
+            ourResult,
+        }: {
+            target: string;
+            search: string;
+            formattedTimes: ReactNode;
+            ourResult: boolean;
+        }) => {
             const rater = new FuzzyRater(search, {
                 fuzziness: ourResult ? init.fuzziness : fuzziness,
             });
@@ -57,11 +69,12 @@ export const RaterTestSkeleton: FC<{
     );
     return (
         <SearchTestSkeleton
+            code={code}
             title={title}
             description={description}
             results={results}
             init={init}
-            run={(search, text) => {
+            getRunner={(search, text) => () => {
                 const rater = new FuzzyRater(search, {fuzziness});
                 return getAction(rater, text);
             }}

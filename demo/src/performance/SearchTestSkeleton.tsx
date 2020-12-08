@@ -10,12 +10,15 @@ import {
 } from "@fluentui/react";
 import React, {FC, ReactNode, useMemo, useRef, useState} from "react";
 import {Section} from "./Section";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import vsStyle from "react-syntax-highlighter/dist/esm/styles/hljs/vs";
 
 const theme = getTheme();
 /**
  * A search test skeleton, such that it can be used for different test types
  */
 export const SearchTestSkeleton: FC<{
+    code: string;
     description: ReactNode;
     title: string;
     init: {
@@ -26,10 +29,8 @@ export const SearchTestSkeleton: FC<{
     results: {
         compile: number;
         execute: number;
-        count: number;
-        charCount: number;
     };
-    run: (search: string, target: string, count: number) => () => void;
+    getRunner: (search: string, target: string, count: number) => () => () => void;
     getResult?: (data: {
         ourResult: boolean;
         execTime: number;
@@ -41,12 +42,13 @@ export const SearchTestSkeleton: FC<{
         formattedTimes: JSX.Element;
     }) => JSX.Element;
 }> = ({
-    run,
+    getRunner,
     description,
     children,
     results: ourResults,
     init,
     title,
+    code,
     getResult = ({formattedTimes}) => formattedTimes,
 }) => {
     const camelCaseTitle = title.replace(/\s(.)/g, (m, g1) => g1.toUpperCase());
@@ -74,20 +76,14 @@ export const SearchTestSkeleton: FC<{
                 />
             ),
         });
-    }, [
-        init.count,
-        init.search,
-        init.target,
-        ourResults.compile,
-        ourResults.execute,
-        ourResults.count,
-    ]);
+    }, [init.count, init.search, init.target, ourResults.compile, ourResults.execute]);
 
     const startTest = async () => {
         setResult(undefined);
         running.current = true;
+        const run = getRunner(search, target, count);
         let compileTime = -Date.now();
-        const exec = run(search, target, count);
+        const exec = run();
         compileTime += Date.now();
 
         let execTime = 0;
@@ -138,6 +134,12 @@ export const SearchTestSkeleton: FC<{
                 margin: 5,
             }}>
             <Section title={title} id={camelCaseTitle}>
+                <SyntaxHighlighter
+                    language="javascript"
+                    style={vsStyle}
+                    customStyle={{margin: 0}}>
+                    {code}
+                </SyntaxHighlighter>
                 {description}
             </Section>
 

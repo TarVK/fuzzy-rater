@@ -11,6 +11,9 @@ export const MatcherMatchDataTest: FC = () => (
                 for highlighting.
             </>
         }
+        code={
+            "const matcher = new FuzzyWordMatcher(word, distance); // Compilation\nconst result = matcher.getMatchData(text); // Execution"
+        }
         init={{
             search: "rotten",
             target:
@@ -20,9 +23,7 @@ export const MatcherMatchDataTest: FC = () => (
         }}
         results={{
             compile: 19,
-            execute: 6795,
-            count: 1e5,
-            charCount: 95,
+            execute: 2912,
         }}
         getAction={(rater, text) => () => rater.getMatchData(text)}
         getResult={(rater, text) => {

@@ -1,17 +1,18 @@
 import {Label, SpinButton} from "@fluentui/react";
-import {FuzzyMultiWordMatcher, FuzzyWordMatcher} from "fuzzy-rater";
+import {FuzzyMultiWordMatcher} from "fuzzy-rater";
 import React, {FC, ReactNode, useCallback, useState} from "react";
 import {SearchTestSkeleton} from "../../SearchTestSkeleton";
 import {getColor} from "../../../example/SearchDemo";
 import {HighlightWordMatch} from "../wordMatcher/HighlightWordMatch";
 
 /**
- * A skeleton that can be used to make generic rater tests
+ * A generic skeleton that can be used to make muli word matcher tests
  */
 export const MultiWordMatcherTestSkeleton: FC<{
     title: string;
     description: ReactNode;
-    results: {compile: number; execute: number; count: number; charCount: number};
+    code: string;
+    results: {compile: number; execute: number};
     init: {
         search: string;
         target: string;
@@ -24,6 +25,7 @@ export const MultiWordMatcherTestSkeleton: FC<{
 }> = ({
     title,
     description,
+    code,
     init,
     results,
     getAction,
@@ -32,7 +34,17 @@ export const MultiWordMatcherTestSkeleton: FC<{
 }) => {
     const [maxDistance, setMaxDistance] = useState(init.maxDistance);
     const getResult = useCallback(
-        ({target, search, formattedTimes, ourResult}) => {
+        ({
+            target,
+            search,
+            formattedTimes,
+            ourResult,
+        }: {
+            target: string;
+            search: string;
+            formattedTimes: ReactNode;
+            ourResult: boolean;
+        }) => {
             const matcher = new FuzzyMultiWordMatcher(
                 search,
                 ourResult ? init.maxDistance : maxDistance
@@ -59,9 +71,10 @@ export const MultiWordMatcherTestSkeleton: FC<{
         <SearchTestSkeleton
             title={title}
             description={description}
+            code={code}
             results={results}
             init={init}
-            run={(search, text) => {
+            getRunner={(search, text) => () => {
                 const matcher = new FuzzyMultiWordMatcher(search, maxDistance);
                 return getAction(matcher, text);
             }}

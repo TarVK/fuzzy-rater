@@ -13,7 +13,7 @@ export const TestsSection: FC<{title: string; description: ReactNode}> = ({
 }) => (
     <>
         <h2
-            style={{...(theme.fonts.xxLarge as any), margin: 0}}
+            style={{...(theme.fonts.xxLarge as any), margin: 0, marginTop: 20}}
             id={title.replace(/\s(.)/g, (m, g1) => g1.toUpperCase())}>
             {title}
         </h2>

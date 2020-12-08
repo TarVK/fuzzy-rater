@@ -124,12 +124,18 @@ export class FuzzyRater {
     }
 
     /**
-     * Computes all relevant match data for the given text
-     * @param text The text to get match data for
-     * @returns
+     * Retrieves the word matches for a given string
+     * @param text The text to get the matches for
+     * @returns The matches as well as some additional costs
      */
-    public getMatch(text: string): IFuzzyMatch {
-        const {missingCost, extraBonus, matches} = this.wordMatchers.reduce(
+    protected getWordMatches(
+        text: string
+    ): {
+        missingCost: number;
+        extraBonus: number;
+        matches: (IWordOrderMatchInput & {distance: number})[];
+    } {
+        return this.wordMatchers.reduce(
             (
                 {missingCost, extraBonus, matches: prevMatches},
                 {count: requireWordCount, matcher}
@@ -162,6 +168,15 @@ export class FuzzyRater {
                 matches: [] as (IWordOrderMatchInput & {distance: number})[],
             }
         );
+    }
+
+    /**
+     * Computes all relevant match data for the given text
+     * @param text The text to get match data for
+     * @returns
+     */
+    public getMatch(text: string): IFuzzyMatch {
+        const {missingCost, extraBonus, matches} = this.getWordMatches(text);
 
         if (matches.length > 0) {
             const orderCost = this.orderMatcher.getMatch(matches);

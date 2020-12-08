@@ -13,6 +13,9 @@ export const RaterMatchDataLinearTest: FC = () => (
                 linear time.
             </>
         }
+        code={
+            "const rater = new FuzzyRater(search, settings); // Compilation\nconst result = rater.getMatchData(text); // Execution"
+        }
         init={{
             search: "rotten black tomatoes",
             target: "I like to eat a bunch of rotten black tomatoes at once, but rotten black apples aren't as good.".repeat(
@@ -23,9 +26,7 @@ export const RaterMatchDataLinearTest: FC = () => (
         }}
         results={{
             compile: 30,
-            execute: 26472,
-            count: 1e5,
-            charCount: 95,
+            execute: 12671,
         }}
         hideMatch
         getAction={(rater, text) => () => rater.getMatchData(text)}

@@ -11,6 +11,9 @@ export const RaterScoreLinearTest: FC = () => (
                 that matching really does take only linear time.
             </>
         }
+        code={
+            "const rater = new FuzzyRater(search, settings); // Compilation\nconst result = rater.getScore(text); // Execution"
+        }
         init={{
             search: "rotten black tomatoes",
             target: "I like to eat a bunch of rotten black tomatoes at once, but rotten black apples aren't as good.".repeat(
@@ -22,8 +25,6 @@ export const RaterScoreLinearTest: FC = () => (
         results={{
             compile: 30,
             execute: 3612,
-            count: 1e3,
-            charCount: 95 * 1e2,
         }}
         hideMatch
         getAction={(rater, text) => () => rater.getScore(text)}

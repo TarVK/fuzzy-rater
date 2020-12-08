@@ -13,19 +13,20 @@ export const MultiMatcherMatchDataLinearTest: FC = () => (
                 linear time.
             </>
         }
+        code={
+            "const matcher = new FuzzyMultiWordMatcher(word, distance); // Compilation\nconst result = matcher.getMatchData(text); // Execution"
+        }
         init={{
             search: "rotten",
             target: "I like to eat a bunch of rottkn black tomatoes at once, but rotten black apples aren't as good.".repeat(
-                1e3
+                1e2
             ),
-            count: 1e2,
+            count: 1e3,
             maxDistance: 2,
         }}
         results={{
             compile: 7,
             execute: 4227,
-            count: 1e3,
-            charCount: 95 * 1e2,
         }}
         getAction={(rater, text) => () => rater.getMatchData(text)}
         hideMatch

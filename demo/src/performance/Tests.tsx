@@ -13,6 +13,8 @@ import {MultiMatcherScoreFailureTest} from "./tests/multiWordMatcher/MultiMatche
 import {MultiMatcherMatchDataTest} from "./tests/multiWordMatcher/MultiMatcherMatchDataTest";
 import {MultiMatcherScoreLinearTest} from "./tests/multiWordMatcher/MultiMatcherScoreLinearTest";
 import {MultiMatcherMatchDataLinearTest} from "./tests/multiWordMatcher/MultiMatcherMatchDataLinearTest";
+import {OrderMatcherScoreSuccessTest} from "./tests/orderMatcher/OrderMatcherScoreSuccessTest";
+import {OrderMatcherMatchDataTest} from "./tests/orderMatcher/OrderMatcherMatchDataTest";
 
 /**
  * A bunch of performance tests for the system
@@ -23,11 +25,12 @@ export const Tests: FC = () => (
             title="Fuzzy rater"
             description={
                 <>
-                    The main fuzzy rater class to rate input texts based on word
-                    occurrence, typos and word order. <br /> Construction (/compilation)
-                    time of the rater increases exponentially with fuzziness and word
-                    length, but only linearly with word count. <br /> Execution time only
-                    increases linearly with character count and match count.
+                    The main fuzzy rater class can be used to rate input texts based on
+                    word occurrence, typos and word order. <br /> Construction
+                    (/compilation) time of the rater increases exponentially with
+                    fuzziness and word length, but only linearly with word count. <br />
+                    Execution time only increases linearly with character count and match
+                    count.
                 </>
             }>
             <RaterScoreSuccessTest />
@@ -40,12 +43,12 @@ export const Tests: FC = () => (
             title="Word matcher"
             description={
                 <>
-                    The word matcher class to find whether the given text contains the
-                    word, and with how many typos. This doesn't check whether multiple
-                    occurrences exist, it only tries to find the best one. <br />{" "}
-                    Construction (/compilation) time of the rater increases exponentially
-                    with max similarity distance and word length. <br /> Execution time
-                    only increases linearly with character count.
+                    The word matcher class can be used to find whether the given text
+                    contains the word, and with how many typos. This doesn't check whether
+                    multiple occurrences exist, it only tries to find the best one. <br />
+                    Construction (/compilation) time of the matcher increases
+                    exponentially with max similarity distance and word length. <br />
+                    Execution time only increases linearly with character count.
                 </>
             }>
             <MatcherScoreSuccessTest />
@@ -56,11 +59,11 @@ export const Tests: FC = () => (
             title="Multi word matcher"
             description={
                 <>
-                    The word matcher class to find whether the given text contains the
-                    word, how often it does, and with how many typos. <br /> Construction
-                    (/compilation) time of the rater increases exponentially with max
-                    similarity distance and word length. <br /> Execution time only
-                    increases linearly with character count.
+                    The word matcher class can be used to find whether the given text
+                    contains the word, how often it does, and with how many typos. <br />
+                    Construction (/compilation) time of the matcher increases
+                    exponentially with max similarity distance and word length. <br />
+                    Execution time only increases linearly with character count.
                 </>
             }>
             <MultiMatcherScoreSuccessTest />
@@ -68,6 +71,21 @@ export const Tests: FC = () => (
             <MultiMatcherScoreLinearTest />
             <MultiMatcherMatchDataTest />
             <MultiMatcherMatchDataLinearTest />
+        </TestsSection>
+        <TestsSection
+            title="Word order matcher"
+            description={
+                <>
+                    The word order matcher class can be used to find the best selection of
+                    words to minimize swaps and distance between them. <br /> Construction
+                    (/compilation) time of the matcher increases only linearly with number
+                    of words, and construction time is generally negligible. <br />
+                    Execution time only increases linearly with match and query word
+                    count.
+                </>
+            }>
+            <OrderMatcherScoreSuccessTest />
+            <OrderMatcherMatchDataTest />
         </TestsSection>
     </>
 );

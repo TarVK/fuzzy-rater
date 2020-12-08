@@ -6,12 +6,13 @@ import {getColor} from "../../../example/SearchDemo";
 import {HighlightWordMatch} from "./HighlightWordMatch";
 
 /**
- * A skeleton that can be used to make generic rater tests
+ * A generic skeleton that can be used to make word matcher tests
  */
 export const WordMatcherTestSkeleton: FC<{
     title: string;
     description: ReactNode;
-    results: {compile: number; execute: number; count: number; charCount: number};
+    code: string;
+    results: {compile: number; execute: number};
     init: {
         search: string;
         target: string;
@@ -24,6 +25,7 @@ export const WordMatcherTestSkeleton: FC<{
 }> = ({
     title,
     description,
+    code,
     init,
     results,
     getAction,
@@ -32,7 +34,17 @@ export const WordMatcherTestSkeleton: FC<{
 }) => {
     const [maxDistance, setMaxDistance] = useState(init.maxDistance);
     const getResult = useCallback(
-        ({target, search, formattedTimes, ourResult}) => {
+        ({
+            target,
+            search,
+            formattedTimes,
+            ourResult,
+        }: {
+            target: string;
+            search: string;
+            formattedTimes: ReactNode;
+            ourResult: boolean;
+        }) => {
             const matcher = new FuzzyWordMatcher(
                 search,
                 ourResult ? init.maxDistance : maxDistance
@@ -59,9 +71,10 @@ export const WordMatcherTestSkeleton: FC<{
         <SearchTestSkeleton
             title={title}
             description={description}
+            code={code}
             results={results}
             init={init}
-            run={(search, text) => {
+            getRunner={(search, text) => () => {
                 const matcher = new FuzzyWordMatcher(search, maxDistance);
                 return getAction(matcher, text);
             }}

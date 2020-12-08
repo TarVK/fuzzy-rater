@@ -11,6 +11,9 @@ export const RaterMatchDataTest: FC = () => (
                 for highlighting.
             </>
         }
+        code={
+            "const rater = new FuzzyRater(search, settings); // Compilation\nconst result = rater.getMatchData(text); // Execution"
+        }
         init={{
             search: "rotten black tomatoes",
             target:
@@ -20,9 +23,7 @@ export const RaterMatchDataTest: FC = () => (
         }}
         results={{
             compile: 30,
-            execute: 26472,
-            count: 1e5,
-            charCount: 95,
+            execute: 13879,
         }}
         getAction={(rater, text) => () => rater.getMatchData(text)}
         getResult={(rater, text) => {

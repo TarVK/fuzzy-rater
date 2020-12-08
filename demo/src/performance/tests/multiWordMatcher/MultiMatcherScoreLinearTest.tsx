@@ -9,9 +9,11 @@ export const MultiMatcherScoreLinearTest: FC = () => (
             <>
                 The same test as before where we find a proper match, but now fewer times
                 on larger strings, instead of more times on smaller strings. This shows
-                that matching really does take only linear time. <br />
-                This can be used as a comparison against the NFA test.
+                that matching really does take only linear time.
             </>
+        }
+        code={
+            "const matcher = new FuzzyMultiWordMatcher(word, distance); // Compilation\nconst result = matcher.getMatch(text); // Execution"
         }
         init={{
             search: "rotten",
@@ -24,8 +26,6 @@ export const MultiMatcherScoreLinearTest: FC = () => (
         results={{
             compile: 7,
             execute: 583,
-            count: 1e3,
-            charCount: 95 * 1e2,
         }}
         getAction={(rater, text) => () => rater.getMatch(text)}
         hideMatch

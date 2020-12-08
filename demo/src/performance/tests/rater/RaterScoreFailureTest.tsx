@@ -10,6 +10,9 @@ export const RaterScoreFailureTest: FC = () => (
                 some steps can be skipped.
             </>
         }
+        code={
+            "const rater = new FuzzyRater(search, settings); // Compilation\nconst result = rater.getScore(text); // Execution"
+        }
         init={{
             search: "rotten black tomatoes",
             target:
@@ -20,8 +23,6 @@ export const RaterScoreFailureTest: FC = () => (
         results={{
             compile: 30,
             execute: 1622,
-            count: 1e5,
-            charCount: 105,
         }}
         getAction={(rater, text) => () => rater.getScore(text)}
         getResult={(rater, text) => <>Score: {rater.getScore(text)}</>}

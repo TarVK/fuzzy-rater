@@ -1,9 +1,13 @@
 import React, {FC} from "react";
+import {Call} from "../../Call";
 import {RaterTestSkeleton} from "./RaterTestSkeleton";
 
 export const RaterScoreSuccessTest: FC = () => (
     <RaterTestSkeleton
         title="Rater matches score"
+        code={
+            "const rater = new FuzzyRater(search, settings); // Compilation\nconst result = rater.getScore(text); // Execution"
+        }
         description={
             <>
                 A simple test of purely computing the score when all data includes
@@ -20,8 +24,6 @@ export const RaterScoreSuccessTest: FC = () => (
         results={{
             compile: 30,
             execute: 3469,
-            count: 1e5,
-            charCount: 95,
         }}
         getAction={(rater, text) => () => rater.getScore(text)}
         getResult={(rater, text) => <>Score: {rater.getScore(text)}</>}
