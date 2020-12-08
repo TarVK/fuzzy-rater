@@ -2,10 +2,10 @@
 
 Fuzzy-rater is a library that can be used to create your own search system. It includes a couple of classes with which a fuzzy search system can be created:
 
--   FuzzyRater
--   FuzzyWordMatcher
--   FuzzyMultiWordMatcher
--   WordOrderMatcher
+-   [FuzzyRater](#FuzzyRater)
+-   [FuzzyWordMatcher](#FuzzyWordMatcher)
+-   [FuzzyMultiWordMatcher](#FuzzyMultiWordMatcher)
+-   [WordOrderMatcher](#WordOrderMatcher)
 
 Each of the classes (except for WordOrderMatcher) have a relatively large construction time, which increases exponentially with the allowed fuzziness.
 Once the class has been constructed, the search text and fuzziness is irrelevant for efficiency.
