@@ -16,7 +16,11 @@ export class FuzzyRater {
     protected config: Required<IFuzzyRateConfig>;
     protected query: Required<IFuzzyWordInput>[];
 
-    protected wordMatchers: {count: number; matcher: FuzzyMultiWordMatcher}[];
+    protected wordMatchers: {
+        count: number;
+        matcher: FuzzyMultiWordMatcher;
+        words: Required<IFuzzyWordInput>[];
+    }[];
     protected orderMatcher: WordOrderMatcher;
 
     /**
@@ -67,6 +71,8 @@ export class FuzzyRater {
                 0
             ),
             skipPenalty: normalizedConfig.skipPenalty,
+            missingPenalty: normalizedConfig.missingPenalty,
+            typoPenalty: normalizedConfig.typoPenalty,
             ...input,
         }));
         return {query: normalizedQuery, config: normalizedConfig};
@@ -79,18 +85,27 @@ export class FuzzyRater {
     protected initializeWordMatchers(): {
         count: number;
         matcher: FuzzyMultiWordMatcher;
+        words: Required<IFuzzyWordInput>[];
     }[] {
-        return this.query.reduce((matchers, {word, maxDistance}, i) => {
-            const alreadyContains = matchers.find(({matcher}) => matcher.word == word);
+        return this.query.reduce((matchers, word, i) => {
+            const alreadyContains = matchers.find(
+                ({matcher}) => matcher.word == word.word
+            );
             if (alreadyContains)
-                matchers.map(({count, matcher}) =>
-                    matcher.word == word ? {count: count + 1, matcher} : {count, matcher}
+                matchers.map(({count, matcher, words}) =>
+                    matcher.word == word.word
+                        ? {count: count + 1, matcher, words: [...words, word]}
+                        : {count, matcher, words}
                 );
             return [
                 ...matchers,
-                {count: 1, matcher: new FuzzyMultiWordMatcher(word, maxDistance)},
+                {
+                    count: 1,
+                    matcher: new FuzzyMultiWordMatcher(word.word, word.maxDistance),
+                    words: [word],
+                },
             ];
-        }, [] as {count: number; matcher: FuzzyMultiWordMatcher}[]);
+        }, [] as {count: number; matcher: FuzzyMultiWordMatcher; words: Required<IFuzzyWordInput>[]}[]);
     }
 
     /**
@@ -138,7 +153,11 @@ export class FuzzyRater {
         return this.wordMatchers.reduce(
             (
                 {missingCost, extraBonus, matches: prevMatches},
-                {count: requireWordCount, matcher}
+                {
+                    count: requireWordCount,
+                    matcher,
+                    words: [{missingPenalty, typoPenalty, extraBonus: wordExtraBonus}],
+                }
             ) => {
                 // Retrieve the matches for this matcher
                 const matches = matcher.getMatch(text);
@@ -147,18 +166,15 @@ export class FuzzyRater {
                     ...match,
                     word,
                     index: match.endIndex - word.length + match.distance,
-                    cost: match.distance * this.config.typoPenalty,
+                    cost: match.distance * typoPenalty,
                 }));
 
                 return {
-                    missingCost:
-                        missingCost +
-                        (matches.length == 0 ? this.config.missingPenalty : 0),
+                    missingCost: missingCost + (matches.length == 0 ? missingPenalty : 0),
                     // Note: It doesn't consider distance or typos in extra matches
                     extraBonus:
                         extraBonus +
-                        Math.max(0, matches.length - requireWordCount) *
-                            this.config.extraBonus,
+                        Math.max(0, matches.length - requireWordCount) * wordExtraBonus,
                     matches: this.mergeMatches(prevMatches, normalized),
                 };
             },
@@ -173,7 +189,7 @@ export class FuzzyRater {
     /**
      * Computes all relevant match data for the given text
      * @param text The text to get match data for
-     * @returns
+     * @returns The fuzzy match data, including score and individual components
      */
     public getMatch(text: string): IFuzzyMatch {
         const {missingCost, extraBonus, matches} = this.getWordMatches(text);
@@ -200,7 +216,7 @@ export class FuzzyRater {
     /**
      * Retrieves the score for a given piece of text
      * @param text The text to be rated
-     * @returns A score, where large is worse
+     * @returns A score, where larger is worse
      */
     public getScore(text: string): number {
         return this.getMatch(text).score;
@@ -215,11 +231,22 @@ export class FuzzyRater {
         const {missingCost, extraBonus, matches, alterations} = this.wordMatchers.reduce(
             (
                 {missingCost, extraBonus, matches: prevMatches, alterations},
-                {count: requireWordCount, matcher}
+                {
+                    count: requireWordCount,
+                    matcher,
+                    words: [
+                        {
+                            word,
+                            extraBonus: wordExtraBonus,
+                            skipPenalty,
+                            missingPenalty,
+                            typoPenalty,
+                        },
+                    ],
+                }
             ) => {
                 // Retrieve the matches for this matcher
                 const matchData = matcher.getMatchData(text);
-                const word = matcher.word;
                 const matches = matchData.alterations.reduce((matches, alteration) => {
                     if (alteration.query.index == 0 && alteration.type != "ignore") {
                         const distance = matchData.distances[matches.length];
@@ -230,7 +257,7 @@ export class FuzzyRater {
                                 index: alteration.target.index,
                                 endIndex:
                                     alteration.target.index + word.length - distance,
-                                cost: distance * this.config.typoPenalty,
+                                cost: distance * typoPenalty,
                             },
                         ];
                     }
@@ -240,14 +267,12 @@ export class FuzzyRater {
                 return {
                     missingCost:
                         missingCost +
-                        (matchData.distances.length == 0
-                            ? this.config.missingPenalty
-                            : 0),
+                        (matchData.distances.length == 0 ? missingPenalty : 0),
                     // Note: It doesn't consider distance or typos in extra matches
                     extraBonus:
                         extraBonus +
                         Math.max(0, matchData.distances.length - requireWordCount) *
-                            this.config.extraBonus,
+                            wordExtraBonus,
                     matches: this.mergeMatches(prevMatches, matches),
                     alterations: [
                         ...alterations,

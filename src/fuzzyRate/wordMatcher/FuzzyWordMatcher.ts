@@ -15,7 +15,7 @@ export class FuzzyWordMatcher {
     public maxDistance: number;
 
     /**
-     * Constructs a new fuzzy word rater
+     * Constructs a new fuzzy word matcher
      * @param word The word to look for
      * @param maxDistance The maximum error
      */

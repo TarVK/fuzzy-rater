@@ -20,7 +20,7 @@ export class FuzzyMultiWordMatcher {
     public maxDistance: number;
 
     /**
-     * Constructs a new fuzzy word rater
+     * Constructs a new fuzzy word matcher
      * @param word The word to look for
      * @param maxDistance The maximum error
      */
@@ -82,9 +82,9 @@ export class FuzzyMultiWordMatcher {
     }
 
     /**
-     * Retrieves the best match in the given text
+     * Retrieves the best matches in the given text
      * @param text The text to find the query word in
-     * @returns Whether the text matched, and the distance from the query word
+     * @returns The distances from the query word and indices of the end of the word
      */
     public getMatch(text: string): {endIndex: number; distance: number}[] {
         // Execute the DFA
@@ -213,7 +213,7 @@ export class FuzzyMultiWordMatcher {
     }
 
     /**
-     * Retrieves the best match in the given text, and data of how to obtain it
+     * Retrieves the best matches in the given text, and data of how to obtain it
      * @param text The text to find the query word in
      * @returns The distances from the query word, for each match (no distances = no matches), and how the text differed
      */

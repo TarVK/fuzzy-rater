@@ -8,7 +8,7 @@ export type IFuzzyRateConfig = {
     skipPenalty?: number;
     /** How much missing a word completely should cost (defaults to 50)*/
     missingPenalty?: number;
-    /** How expensive making a single character typo is (defaults to 100) */
+    /** How expensive making a single character typo is (defaults to 5) */
     typoPenalty?: number;
     /** The bonus when more of the query words are found (defaults to 5) */
     extraBonus?: number;
