@@ -406,8 +406,9 @@ The fuzzy rater has 5 properties that can be configured, either per search word 
 -   `missingPenalty`: The number to increase the score with, if this word wasn't found at all
 -   `typoPenalty`: The number to increase the score with per typo, if the word was found in sequence
 -   `extraBonus`: The number to decrease the score with, for each additional occurrence of the word (ignores typo costs)
-    All these values are relative to the cost of how far words are found apart. E.g. when looking for `something cool`,
-    finding `something else cool` would have the search terms 5 characters apart, and thus a score increased with 5.
+    
+All these values are relative to the cost of how far words are found apart. E.g. when looking for `something cool`,
+finding `something else cool` would have the search terms 5 characters apart, and thus a score increased by 5.
 
 #### Finding words
 
